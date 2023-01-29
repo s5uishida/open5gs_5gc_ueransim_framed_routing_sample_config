@@ -1,0 +1,1 @@
+# open5gs_5gc_ueransim_framed_routing_sample_config
