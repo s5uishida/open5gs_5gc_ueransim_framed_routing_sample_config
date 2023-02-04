@@ -54,7 +54,7 @@ I created a 5GC simulation mobile network for  the purpose of using  the IP rout
 
 The following minimum configuration was set as a condition.
 - Two UEs have the same DNN and connect to the same DN.
-- Two UEs have different Framed Routes. On the UPF VM, make sure to be able to ping the Framed Routes via the IP address assigned to each UE.
+- Two UEs have different Framed Routes. On the UPF VM, make sure to be able to ping the Framed Routes via the IP address (Tunnel GW/uesimtun0) assigned to each UE.
 
 The built simulation environment is as follows.
 
