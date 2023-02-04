@@ -74,7 +74,7 @@ Each VMs are as follows.
 | VM5 | UERANSIM UE1 | 192.168.0.133/24 | Ubuntu 20.04 | 1GB | 10GB |
 
 Subscriber Information (other information is the same) is as follows.  
-**Note. Please select OP or OPc according to the setting of UERANSIM UE configuration files. As of 2023.01.29, Framed Routes cannot be set from the WebUI. Also, if you change the `open5gs-dbctl` script, it seems that you can register these with this script, but I could not register.**
+**Note. Please select OP or OPc according to the setting of UERANSIM UE configuration files. As of 2023.01.29, Framed Routes cannot be set with the WebUI. Also, if you change the `open5gs-dbctl` script, it seems that you can register these with this script, but I could not register.**
 | UE # | IMSI | DNN | OP/OPc | Framed Routes |
 | --- | --- | --- | --- | -- |
 | UE0 | 001010000000000 | internet | OPc | 192.168.20.0/24 |
