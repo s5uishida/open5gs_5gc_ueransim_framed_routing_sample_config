@@ -943,8 +943,11 @@ PING 192.168.23.100 (192.168.23.100) from 10.45.0.1 ogstun: 56(84) bytes of data
 I was able to confirm the very simple configuration for Framed Routing.
 In practice, I think that PSA-UPF and UE will require more complex network routing configuration.
 In this article, I kept the minimum settings necessary to check Framed Routing.
+See [here](https://github.com/s5uishida/open5gs_5gc_ueransim_framed_routing_sample_config/issues/2#issuecomment-1464891842) for ping between UE0 and UE1, and ping between Framed routes belonging to different UEs.
+
 I would like to thank the excellent developers and all the contributors of Open5GS and UERANSIM.
 
 <h2 id="changelog">Changelog (summary)</h2>
 
+- [2023.03.11] Added the description about ping between UE0 and UE1, and ping between Framed routes belonging to different UEs.
 - [2023.01.29] Initial release.
