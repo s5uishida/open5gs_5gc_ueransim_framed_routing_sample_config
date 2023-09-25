@@ -3,7 +3,9 @@ This describes a very simple configuration that uses Open5GS and UERANSIM for Fr
 
 ---
 
-<h2 id="conf_list">List of Sample Configurations</h2>
+<a id="conf_list"></a>
+
+## List of Sample Configurations
 
 1. [One SGW-C/PGW-C, one SGW-U/PGW-U and one APN](https://github.com/s5uishida/open5gs_epc_srsran_sample_config)
 2. [One SGW-C/PGW-C, Multiple SGW-Us/PGW-Us and APNs](https://github.com/s5uishida/open5gs_epc_oai_sample_config)
@@ -20,7 +22,9 @@ This describes a very simple configuration that uses Open5GS and UERANSIM for Fr
 13. [VPP-UPF with DPDK](https://github.com/s5uishida/open5gs_5gc_ueransim_vpp_upf_dpdk_sample_config)
 ---
 
-<h2 id="misc">Miscellaneous Notes</h2>
+<a id="misc"></a>
+
+## Miscellaneous Notes
 
 - [Install MongoDB 6.0 and Open5GS WebUI](https://github.com/s5uishida/open5gs_install_mongodb6_webui)
 - [Install MongoDB 4.4.18 on Ubuntu 20.04 for Raspberry Pi 4B](https://github.com/s5uishida/install_mongodb_on_ubuntu_for_rp4b)
@@ -28,7 +32,9 @@ This describes a very simple configuration that uses Open5GS and UERANSIM for Fr
 - [A Note for Changing Network Interface of UPF from TUN to TAP in Open5GS](https://github.com/s5uishida/change_from_tun_to_tap_in_open5gs)
 ---
 
-<h2 id="toc">Table of Contents</h2>
+<a id="toc"></a>
+
+## Table of Contents
 
 - [Overview of Open5GS 5GC Simulation Mobile Network](#overview)
 - [Changes in configuration files of Open5GS 5GC and UERANSIM UE / RAN](#changes)
@@ -60,7 +66,9 @@ This describes a very simple configuration that uses Open5GS and UERANSIM for Fr
   - [Ping IP address (192.168.23.100/24) of Framed Routes (not exist)](#ping_ue2)
 - [Changelog (summary)](#changelog)
 ---
-<h2 id="overview">Overview of Open5GS 5GC Simulation Mobile Network</h2>
+<a id="overview"></a>
+
+## Overview of Open5GS 5GC Simulation Mobile Network
 
 I created a 5GC simulation mobile network for  the purpose of using  the IP routes (Framed Routes) behind the UE.
 
@@ -100,13 +108,17 @@ The DN is as follows.
 | --- | --- | --- | --- |
 | 10.45.0.0/16 | ogstun | internet | uesimtun0 |
 
-<h2 id="changes">Changes in configuration files of Open5GS 5GC and UERANSIM UE / RAN</h2>
+<a id="changes"></a>
+
+## Changes in configuration files of Open5GS 5GC and UERANSIM UE / RAN
 
 Please refer to the following for building Open5GS and UERANSIM respectively.
 - Open5GS v2.6.1 (2023.03.18) - https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/
 - UERANSIM v3.2.6 (2023.03.17) - https://github.com/aligungr/UERANSIM/wiki/Installation
 
-<h3 id="changes_cp">Changes in configuration files of Open5GS 5GC C-Plane</h3>
+<a id="changes_cp"></a>
+
+### Changes in configuration files of Open5GS 5GC C-Plane
 
 - `open5gs/install/etc/open5gs/amf.yaml`
 ```diff
@@ -187,7 +199,9 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
  #  o Disable use of IPv4 addresses (only IPv6)
 ```
 
-<h3 id="changes_up">Changes in configuration files of Open5GS 5GC U-Plane</h3>
+<a id="changes_up"></a>
+
+### Changes in configuration files of Open5GS 5GC U-Plane
 
 - `open5gs/install/etc/open5gs/upf.yaml`
 ```diff
@@ -212,9 +226,13 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
          port: 9090
 ```
 
-<h3 id="changes_ueransim">Changes in configuration files of UERANSIM UE / RAN</h3>
+<a id="changes_ueransim"></a>
 
-<h4 id="changes_ran">Changes in configuration files of RAN</h4>
+### Changes in configuration files of UERANSIM UE / RAN
+
+<a id="changes_ran"></a>
+
+#### Changes in configuration files of RAN
 
 - `UERANSIM/config/open5gs-gnb.yaml`
 ```diff
@@ -246,7 +264,9 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
  # List of supported S-NSSAIs by this gNB
 ```
 
-<h4 id="changes_ue0">Changes in configuration files of UE0 (IMSI-001010000000000)</h4>
+<a id="changes_ue0"></a>
+
+#### Changes in configuration files of UE0 (IMSI-001010000000000)
 
 First, copy `open5gs-ue0.yaml` from `open5gs-ue.yaml`.
 ```
@@ -282,7 +302,9 @@ Next, edit `open5gs-ue0.yaml`.
  uacAic:
 ```
 
-<h4 id="changes_ue1">Changes in configuration files of UE1 (IMSI-001010000000001)</h4>
+<a id="changes_ue1"></a>
+
+#### Changes in configuration files of UE1 (IMSI-001010000000001)
 
 First, copy `open5gs-ue1.yaml` from `open5gs-ue.yaml`.
 ```
@@ -318,9 +340,13 @@ Next, edit `open5gs-ue1.yaml`.
  uacAic:
 ```
 
-<h2 id="network_settings">Network settings of Open5GS 5GC and UERANSIM UE / RAN</h2>
+<a id="network_settings"></a>
 
-<h3 id="network_settings_up">Network settings of Open5GS 5GC U-Plane</h3>
+## Network settings of Open5GS 5GC and UERANSIM UE / RAN
+
+<a id="network_settings_up"></a>
+
+### Network settings of Open5GS 5GC U-Plane
 
 First, uncomment the next line in the `/etc/sysctl.conf` file and reflect it in the OS.
 ```
@@ -338,7 +364,9 @@ ip link set ogstun up
 iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE
 ```
 
-<h3 id="network_settings_ue0">Network settings of UERANSIM UE0</h3>
+<a id="network_settings_ue0"></a>
+
+### Network settings of UERANSIM UE0
 
 After starting UE0 of UERANSIM on VM4, set the Framed Routes IP address (ex.`192.168.20.100/24`) and the routing of DN (`10.45.0.0/16`) to the `uesimtun0` interface as follows.
 ```
@@ -346,7 +374,9 @@ ip addr add 192.168.20.100/24 dev uesimtun0
 ip route add 10.45.0.0/16 dev uesimtun0
 ```
 
-<h3 id="network_settings_ue1">Network settings of UERANSIM UE1</h3>
+<a id="network_settings_ue1"></a>
+
+### Network settings of UERANSIM UE1
 
 After starting UE1 of UERANSIM on VM5, set the Framed Routes IP addresses (ex.`192.168.21.100/24` and `192.168.22.100/24`) and the routing of DN (`10.45.0.0/16`) to the `uesimtun0` interface as follows.
 ```
@@ -355,12 +385,16 @@ ip addr add 192.168.22.100/24 dev uesimtun0
 ip route add 10.45.0.0/16 dev uesimtun0
 ```
 
-<h2 id="add_framed_routes">Add Framed Routes to Subscriber information</h2>
+<a id="add_framed_routes"></a>
+
+## Add Framed Routes to Subscriber information
 
 [MongoDB Compass](https://www.mongodb.com/products/compass) is a useful GUI tool for working with MongoDB data.
 I used this tool to add Framed Routes in the following operations.
 
-<h3 id="add_framed_routes_ue0">Add Framed Routes to UE0</h3>
+<a id="add_framed_routes_ue0"></a>
+
+### Add Framed Routes to UE0
 
 The UE0's sample subscriber information registered in MongoDB is as follows in JSON format.
 Among these, the items indicated by the arrows are Framed Routes to be added.
@@ -443,7 +477,9 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
 }
 ```
 
-<h3 id="add_framed_routes_ue1">Add Framed Routes to UE1</h3>
+<a id="add_framed_routes_ue1"></a>
+
+### Add Framed Routes to UE1
 
 The UE1's sample subscriber information registered in MongoDB is as follows in JSON format.
 Among these, the items indicated by the arrows are Framed Routes to be added.
@@ -527,7 +563,9 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
 }
 ```
 
-<h2 id="build">Build Open5GS and UERANSIM</h2>
+<a id="build"></a>
+
+## Build Open5GS and UERANSIM
 
 Please refer to the following for building Open5GS and UERANSIM respectively.
 - Open5GS v2.6.1 (2023.03.18) - https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/
@@ -536,11 +574,15 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 Install MongoDB on Open5GS 5GC C-Plane machine.
 It is not necessary to install MongoDB on Open5GS 5GC U-Plane machine.
 
-<h2 id="run">Run Open5GS 5GC and UERANSIM UE / RAN</h2>
+<a id="run"></a>
+
+## Run Open5GS 5GC and UERANSIM UE / RAN
 
 First run the 5GC, then UERANSIM (UE & RAN implementation).
 
-<h3 id="run_cp">Run Open5GS 5GC C-Plane</h3>
+<a id="run_cp"></a>
+
+### Run Open5GS 5GC C-Plane
 
 First, run Open5GS 5GC C-Plane.
 
@@ -561,14 +603,18 @@ sleep 2
 ./install/bin/open5gs-bsfd &
 ```
 
-<h3 id="run_up">Run Open5GS 5GC U-Plane</h3>
+<a id="run_up"></a>
+
+### Run Open5GS 5GC U-Plane
 
 Next, run Open5GS 5GC U-Plane.
 ```
 ./install/bin/open5gs-upfd &
 ```
 
-<h3 id="run_ueran">Run UERANSIM</h3>
+<a id="run_ueran"></a>
+
+### Run UERANSIM
 
 First, do an NG Setup between gNodeB and 5GC, then register the UE with 5GC and establish a PDU session.
 
@@ -576,7 +622,9 @@ Please refer to the following for usage of UERANSIM.
 
 https://github.com/aligungr/UERANSIM/wiki/Usage
 
-<h4 id="start_gnb">Start gNodeB</h4>
+<a id="start_gnb"></a>
+
+#### Start gNodeB
 
 Start gNodeB as follows.
 ```
@@ -597,7 +645,9 @@ The Open5GS C-Plane log when executed is as follows.
 03/18 20:29:47.599: [amf] INFO: gNB-N2[192.168.0.131] max_num_of_ostreams : 10 (../src/amf/amf-sm.c:772)
 ```
 
-<h4 id="start_ue0">Start UE0</h4>
+<a id="start_ue0"></a>
+
+#### Start UE0
 
 Start UE0 as follows. This will register the UE with 5GC and establish a PDU session.
 ```
@@ -738,7 +788,9 @@ listening on uesimtun0, link-type RAW (Raw IP), capture size 262144 bytes
 ```
 **Don't forget [Network settings of UERANSIM UE0](#network_settings_ue0).**
 
-<h4 id="start_ue1">Start UE1</h4>
+<a id="start_ue1"></a>
+
+#### Start UE1
 
 Start UE1 as follows. This will register the UE with 5GC and establish a PDU session.
 ```
@@ -962,7 +1014,9 @@ See [here](https://github.com/s5uishida/open5gs_5gc_ueransim_framed_routing_samp
 
 I would like to thank the excellent developers and all the contributors of Open5GS and UERANSIM.
 
-<h2 id="changelog">Changelog (summary)</h2>
+<a id="changelog"></a>
+
+## Changelog (summary)
 
 - [2023.03.18] Updated to Open5GS v2.6.1 (2023.03.18) and UERANSIM v3.2.6 (2023.03.17).
 - [2023.03.11] Added the description about ping between UE0 and UE1, and ping between Framed routes belonging to different UEs.
