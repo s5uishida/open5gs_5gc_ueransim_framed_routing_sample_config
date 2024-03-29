@@ -136,7 +136,7 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
    security:
 ```
 - `open5gs/install/etc/open5gs/nrf.yaml`
-```
+```diff
 --- nrf.yaml.orig       2024-03-24 15:36:48.000000000 +0900
 +++ nrf.yaml    2024-03-24 20:58:02.000000000 +0900
 @@ -10,8 +10,8 @@
