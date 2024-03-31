@@ -154,8 +154,8 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 - `open5gs/install/etc/open5gs/smf.yaml`
 ```diff
 --- smf.yaml.orig       2024-03-24 15:36:48.000000000 +0900
-+++ smf.yaml    2024-03-29 16:11:25.261962063 +0900
-@@ -19,35 +19,34 @@
++++ smf.yaml    2024-03-31 23:01:38.941943102 +0900
+@@ -19,35 +19,31 @@
          - uri: http://127.0.0.200:7777
    pfcp:
      server:
@@ -164,11 +164,11 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
      client:
        upf:
 -        - address: 127.0.0.7
+-  gtpc:
+-    server:
+-      - address: 127.0.0.4
 +        - address: 192.168.0.112
 +          dnn: internet
-   gtpc:
-     server:
-       - address: 127.0.0.4
    gtpu:
      server:
 -      - address: 127.0.0.4
