@@ -1007,7 +1007,7 @@ I would like to thank the excellent developers and all the contributors of Open5
 
 ## Changelog (summary)
 
-- [2024.03.31] Removed `gtpc` section in `smf.yaml`.
+- [2024.03.31] [This commit](https://github.com/open5gs/open5gs/commit/e8a3b76af395a9986234b7d339a7a96dc5bb537f) fixed the issue where SMF crashes without `gtpc` section in `smf.yaml`. So deleted the `gtpc` section in `smf.yaml` for 5G use.
 - [2024.03.29] Updated to Open5GS v2.7.0 (2024.03.24).
 - [2023.03.18] Updated to Open5GS v2.6.1 (2023.03.18) and UERANSIM v3.2.6 (2023.03.17).
 - [2023.03.11] Added the description about ping between UE0 and UE1, and ping between Framed routes belonging to different UEs.
