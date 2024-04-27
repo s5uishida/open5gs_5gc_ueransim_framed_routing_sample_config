@@ -372,21 +372,25 @@ iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE
 
 ### Network settings of UERANSIM UE0
 
-After starting UE0 of UERANSIM on VM4, set the Framed Routes IP address (ex.`192.168.20.100/24`) and the routing of DN (`10.45.0.0/16`) to the `uesimtun0` interface as follows.
+After starting UE0 of UERANSIM on VM4, set the Framed Routes IP address (ex.`192.168.20.100/24`) and change the default GW interface to `uesimtun0` as follows.
 ```
 ip addr add 192.168.20.100/24 dev uesimtun0
-ip route add 10.45.0.0/16 dev uesimtun0
+
+ip link set dev enp0s3 down
+ip route add default dev uesimtun0
 ```
 
 <a id="network_settings_ue1"></a>
 
 ### Network settings of UERANSIM UE1
 
-After starting UE1 of UERANSIM on VM5, set the Framed Routes IP addresses (ex.`192.168.21.100/24` and `192.168.22.100/24`) and the routing of DN (`10.45.0.0/16`) to the `uesimtun0` interface as follows.
+After starting UE1 of UERANSIM on VM5, set the Framed Routes IP addresses (ex.`192.168.21.100/24` and `192.168.22.100/24`) and change the default GW interface to `uesimtun0` as follows.
 ```
 ip addr add 192.168.21.100/24 dev uesimtun0
 ip addr add 192.168.22.100/24 dev uesimtun0
-ip route add 10.45.0.0/16 dev uesimtun0
+
+ip link set dev enp0s3 down
+ip route add default dev uesimtun0
 ```
 
 <a id="add_framed_routes"></a>
