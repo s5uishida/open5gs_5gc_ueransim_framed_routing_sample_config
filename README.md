@@ -21,8 +21,12 @@ This describes a very simple configuration that uses Open5GS and UERANSIM for Fr
     - [Changes in configuration files of UE1 (IMSI-001010000000001)](#changes_ue1)
 - [Network settings of Open5GS 5GC and UERANSIM UE / RAN](#network_settings)
   - [Network settings of Open5GS 5GC U-Plane](#network_settings_up)
+  - [Network settings of External Node](#network_settings_ext)
   - [Network settings of UERANSIM UE0](#network_settings_ue0)
   - [Network settings of UERANSIM UE1](#network_settings_ue1)
+  - [Network settings of PC1 (Internal Node)](#network_settings_pc1)
+  - [Network settings of PC2 (Internal Node)](#network_settings_pc2)
+  - [Network settings of PC3 (Internal Node)](#network_settings_pc3)
 - [Add Framed Routes to Subscriber information](#add_framed_routes)
   - [Add Framed Routes to UE0](#add_framed_routes_ue0)
   - [Add Framed Routes to UE1](#add_framed_routes_ue1)
@@ -34,10 +38,13 @@ This describes a very simple configuration that uses Open5GS and UERANSIM for Fr
     - [Start gNodeB](#start_gnb)
     - [Start UE0](#start_ue0)
     - [Start UE1](#start_ue1)
+  - [Run tcpdump on PC1](#run_pc1)
+  - [Run tcpdump on PC2](#run_pc2)
+  - [Run tcpdump on PC3](#run_pc3)
 - [Ping Framed Routes](#ping)
-  - [Ping IP address (192.168.20.100/24) of Framed Routes of UE0](#ping_ue0)
-  - [Ping IP address (192.168.21.100/24) of Framed Routes of UE1](#ping_ue11)
-  - [Ping IP address (192.168.22.100/24) of Framed Routes of UE1](#ping_ue12)
+  - [Ping IP address (192.168.20.100/24) of Framed Routes of UE0 on PC1](#ping_ue0)
+  - [Ping IP address (192.168.21.100/24) of Framed Routes of UE1 on PC2](#ping_ue11)
+  - [Ping IP address (192.168.22.100/24) of Framed Routes of UE1 on PC3](#ping_ue12)
   - [Ping IP address (192.168.23.100/24) of Framed Routes (not exist)](#ping_ue2)
 - [Changelog (summary)](#changelog)
 ---
@@ -56,24 +63,28 @@ The built simulation environment is as follows.
 <img src="./images/network-overview.png" title="./images/network-overview.png" width=1000px></img>
 
 The 5GC / UE / RAN used are as follows.
-- 5GC - Open5GS v2.7.0 (2024.03.24) - https://github.com/open5gs/open5gs
-- UE / RAN - UERANSIM v3.2.6 (2024.03.08) - https://github.com/aligungr/UERANSIM
+- 5GC - Open5GS v2.7.6 (2025.11.19) - https://github.com/open5gs/open5gs
+- UE / RAN - UERANSIM v3.2.7 (2025.10.25) - https://github.com/aligungr/UERANSIM
 
 Each VMs are as follows.  
-| VM # | SW & Role | IP address | OS | Memory (Min) | HDD (Min) |
+| VM # | SW & Role | IP address | OS | Mem (Min) | HDD (Min) |
 | --- | --- | --- | --- | --- | --- |
-| VM1 | Open5GS 5GC C-Plane | 192.168.0.111/24 | Ubuntu 22.04 | 2GB | 20GB |
-| VM2 | Open5GS 5GC U-Plane  | 192.168.0.112/24 | Ubuntu 22.04 | 1GB | 20GB |
-| VM3 | UERANSIM RAN (gNodeB) | 192.168.0.131/24 | Ubuntu 22.04 | 1GB | 10GB |
-| VM4 | UERANSIM UE0 | 192.168.0.132/24 | Ubuntu 22.04 | 1GB | 10GB |
-| VM5 | UERANSIM UE1 | 192.168.0.133/24 | Ubuntu 22.04 | 1GB | 10GB |
+| VM1 | Open5GS 5GC C-Plane | 192.168.0.111/24 | Ubuntu 24.04 | 2GB | 20GB |
+| VM2 | Open5GS 5GC U-Plane  | 192.168.0.112/24<br><b>192.168.16.112/24</b> | Ubuntu 24.04 | 1GB | 20GB |
+| EXT | External Node | 192.168.0.152/24<br><b>192.168.16.152/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| VM3 | UERANSIM RAN (gNodeB) | 192.168.0.131/24 | Ubuntu 24.04 | 1GB | 10GB |
+| VM4 | UERANSIM UE0 | 192.168.0.132/24<br><b>192.168.20.1/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| VM5 | UERANSIM UE1 | 192.168.0.133/24<br><b>192.168.21.1/24<br>192.168.22.1/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| PC1 | Internal Node | 192.168.0.161/24<br><b>192.168.20.100/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| PC2 | Internal Node | 192.168.0.162/24<br><b>192.168.21.100/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| PC3 | Internal Node | 192.168.0.163/24<br><b>192.168.22.100/24</b> | Ubuntu 24.04 | 1GB | 10GB |
 
 Subscriber Information (other information is the same) is as follows.  
 **Note. Please select OP or OPc according to the setting of UERANSIM UE configuration files. As of 2023.01.29, Framed Routes cannot be set with the WebUI. Also, if you change the `open5gs-dbctl` script, it seems that you can register these with this script, but I could not register.**
-| UE # | IMSI | DNN | OP/OPc | Framed Routes |
-| --- | --- | --- | --- | -- |
-| UE0 | 001010000000000 | internet | OPc | 192.168.20.0/24 |
-| UE1 | 001010000000001 | internet | OPc | 192.168.21.0/24<br>192.168.22.0/24 |
+| UE # | IMSI | DNN | OP/OPc | Framed Routes | Internal IP address |
+| --- | --- | --- | --- | --- | --- |
+| UE0 | 001010000000000 | internet | OPc | <b>192.168.20.0/24</b> | <b>192.168.20.1</b> |
+| UE1 | 001010000000001 | internet | OPc | <b>192.168.21.0/24<br>192.168.22.0/24</b> | <b>192.168.21.1<br>192.168.22.1</b> |
 
 I registered these information with the Open5GS WebUI.
 In addition, [3GPP TS 35.208](https://www.3gpp.org/DynaReport/35208.htm) "4.3 Test Sets" is published by 3GPP as test data for the 3GPP authentication and key generation functions (MILENAGE).
@@ -88,8 +99,8 @@ The DN is as follows.
 ## Changes in configuration files of Open5GS 5GC and UERANSIM UE / RAN
 
 Please refer to the following for building Open5GS and UERANSIM respectively.
-- Open5GS v2.7.0 (2024.03.24) - https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/
-- UERANSIM v3.2.6 (2024.03.08) - https://github.com/aligungr/UERANSIM/wiki/Installation
+- Open5GS v2.7.6 (2025.11.19) - https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/
+- UERANSIM v3.2.7 (2025.10.25) - https://github.com/aligungr/UERANSIM/wiki/Installation
 
 <a id="changes_cp"></a>
 
@@ -97,9 +108,9 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 
 - `open5gs/install/etc/open5gs/amf.yaml`
 ```diff
---- amf.yaml.orig       2024-03-24 15:36:48.000000000 +0900
-+++ amf.yaml    2024-03-24 20:19:58.000000000 +0900
-@@ -19,27 +19,27 @@
+--- amf.yaml.orig       2025-04-27 11:38:05.000000000 +0900
++++ amf.yaml    2025-11-20 07:31:25.166453278 +0900
+@@ -20,27 +20,27 @@
          - uri: http://127.0.0.200:7777
    ngap:
      server:
@@ -137,9 +148,9 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 ```
 - `open5gs/install/etc/open5gs/nrf.yaml`
 ```diff
---- nrf.yaml.orig       2024-03-24 15:36:48.000000000 +0900
-+++ nrf.yaml    2024-03-24 20:58:02.000000000 +0900
-@@ -10,8 +10,8 @@
+--- nrf.yaml.orig       2025-04-27 11:38:05.000000000 +0900
++++ nrf.yaml    2025-05-04 08:13:05.973154453 +0900
+@@ -11,8 +11,8 @@
  nrf:
    serving:  # 5G roaming requires PLMN in NRF
      - plmn_id:
@@ -153,9 +164,9 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 ```
 - `open5gs/install/etc/open5gs/smf.yaml`
 ```diff
---- smf.yaml.orig       2024-03-24 15:36:48.000000000 +0900
-+++ smf.yaml    2024-03-31 23:01:38.941943102 +0900
-@@ -19,35 +19,31 @@
+--- smf.yaml.orig       2025-04-27 11:38:05.000000000 +0900
++++ smf.yaml    2025-11-20 23:29:21.945846594 +0900
+@@ -20,16 +20,14 @@
          - uri: http://127.0.0.200:7777
    pfcp:
      server:
@@ -176,10 +187,12 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
    metrics:
      server:
        - address: 127.0.0.4
-         port: 9090
+@@ -37,20 +35,17 @@
    session:
-     - subnet: 10.45.0.1/16
--    - subnet: 2001:db8:cafe::1/48
+     - subnet: 10.45.0.0/16
+       gateway: 10.45.0.1
+-    - subnet: 2001:db8:cafe::/48
+-      gateway: 2001:db8:cafe::1
 +      dnn: internet
    dns:
      - 8.8.8.8
@@ -205,9 +218,9 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 
 - `open5gs/install/etc/open5gs/upf.yaml`
 ```diff
---- upf.yaml.orig       2024-03-24 15:36:48.000000000 +0900
-+++ upf.yaml    2024-03-29 16:12:53.684589991 +0900
-@@ -10,16 +10,17 @@
+--- upf.yaml.orig       2024-05-02 19:52:00.000000000 +0900
++++ upf.yaml    2025-11-20 23:29:48.863908116 +0900
+@@ -11,18 +11,18 @@
  upf:
    pfcp:
      server:
@@ -221,8 +234,10 @@ Please refer to the following for building Open5GS and UERANSIM respectively.
 -      - address: 127.0.0.7
 +      - address: 192.168.0.112
    session:
-     - subnet: 10.45.0.1/16
--    - subnet: 2001:db8:cafe::1/48
+     - subnet: 10.45.0.0/16
+       gateway: 10.45.0.1
+-    - subnet: 2001:db8:cafe::/48
+-      gateway: 2001:db8:cafe::1
 +      dnn: internet
 +      dev: ogstun
    metrics:
@@ -280,8 +295,8 @@ First, copy `open5gs-ue0.yaml` from `open5gs-ue.yaml`.
 Next, edit `open5gs-ue0.yaml`.
 - `UERANSIM/config/open5gs-ue0.yaml`
 ```diff
---- open5gs-ue.yaml.orig        2023-12-02 06:14:20.000000000 +0900
-+++ open5gs-ue0.yaml    2024-03-29 16:27:36.390313563 +0900
+--- open5gs-ue.yaml.orig        2025-03-16 15:49:12.000000000 +0900
++++ open5gs-ue0.yaml    2025-05-04 09:24:31.352554298 +0900
 @@ -1,9 +1,9 @@
  # IMSI number of the UE. IMSI = [MCC|MNC|MSISDN] (In total 15 digits)
 -supi: 'imsi-999700000000001'
@@ -295,7 +310,7 @@ Next, edit `open5gs-ue0.yaml`.
  # SUCI Protection Scheme : 0 for Null-scheme, 1 for Profile A and 2 for Profile B
  protectionScheme: 0
  # Home Network Public Key for protecting with SUCI Profile A
-@@ -28,7 +28,7 @@
+@@ -31,7 +31,7 @@
  
  # List of gNB IP addresses for Radio Link Simulation
  gnbSearchList:
@@ -318,8 +333,8 @@ First, copy `open5gs-ue1.yaml` from `open5gs-ue.yaml`.
 Next, edit `open5gs-ue1.yaml`.
 - `UERANSIM/config/open5gs-ue1.yaml`
 ```diff
---- open5gs-ue.yaml.orig        2023-12-02 06:14:20.000000000 +0900
-+++ open5gs-ue1.yaml    2024-03-29 16:30:10.175137471 +0900
+--- open5gs-ue.yaml.orig        2025-03-16 15:49:12.000000000 +0900
++++ open5gs-ue1.yaml    2025-11-21 20:15:31.242725049 +0900
 @@ -1,9 +1,9 @@
  # IMSI number of the UE. IMSI = [MCC|MNC|MSISDN] (In total 15 digits)
 -supi: 'imsi-999700000000001'
@@ -333,7 +348,7 @@ Next, edit `open5gs-ue1.yaml`.
  # SUCI Protection Scheme : 0 for Null-scheme, 1 for Profile A and 2 for Profile B
  protectionScheme: 0
  # Home Network Public Key for protecting with SUCI Profile A
-@@ -28,7 +28,7 @@
+@@ -31,7 +31,7 @@
  
  # List of gNB IP addresses for Radio Link Simulation
  gnbSearchList:
@@ -359,24 +374,46 @@ net.ipv4.ip_forward=1
 ```
 # sysctl -p
 ```
-Next, configure the TUNnel interface and NAPT.
+Next, configure the TUNnel interface and set the routings towards Framed Routes.
 ```
 ip tuntap add name ogstun mode tun
 ip addr add 10.45.0.1/16 dev ogstun
 ip link set ogstun up
 
-iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE
+ip route add 192.168.20.0/24 dev ogstun
+ip route add 192.168.21.0/24 dev ogstun
+ip route add 192.168.22.0/24 dev ogstun
+```
+
+<a id="network_settings_ext"></a>
+
+### Network settings of External Node
+
+Set the routings towards UEs and Framed Routes.
+```
+ip route add 10.45.0.0/16 via 192.168.16.112
+ip route add 192.168.20.0/24 via 192.168.16.112
+ip route add 192.168.21.0/24 via 192.168.16.112
+ip route add 192.168.22.0/24 via 192.168.16.112
 ```
 
 <a id="network_settings_ue0"></a>
 
 ### Network settings of UERANSIM UE0
 
-After starting UE0 of UERANSIM on VM4, set the Framed Routes IP address (ex.`192.168.20.100/24`) and change the default GW interface to `uesimtun0` as follows.
+First, uncomment the next line in the `/etc/sysctl.conf` file and reflect it in the OS.
 ```
-ip addr add 192.168.20.100/24 dev uesimtun0
-
-ip link set dev enp0s3 down
+net.ipv4.ip_forward=1
+```
+```
+# sysctl -p
+```
+Next, after starting UE0 of UERANSIM on VM4, change the default GW interface to `uesimtun0` as follows.
+```
+ip route change default dev uesimtun0
+```
+When stopping UE0 on VM4, the `uesimtun0` interface is lost, and the default GW interface associated with the `uesimtun0` interface is also lost. Therefore, after restarting UE0, add the default GW interface as follows.
+```
 ip route add default dev uesimtun0
 ```
 
@@ -384,13 +421,47 @@ ip route add default dev uesimtun0
 
 ### Network settings of UERANSIM UE1
 
-After starting UE1 of UERANSIM on VM5, set the Framed Routes IP addresses (ex.`192.168.21.100/24` and `192.168.22.100/24`) and change the default GW interface to `uesimtun0` as follows.
+First, uncomment the next line in the `/etc/sysctl.conf` file and reflect it in the OS.
 ```
-ip addr add 192.168.21.100/24 dev uesimtun0
-ip addr add 192.168.22.100/24 dev uesimtun0
-
-ip link set dev enp0s3 down
+net.ipv4.ip_forward=1
+```
+```
+# sysctl -p
+```
+Next, after starting UE1 of UERANSIM on VM5, change the default GW interface to `uesimtun0` as follows.
+```
+ip route change default dev uesimtun0
+```
+When stopping UE1 on VM5, the `uesimtun0` interface is lost, and the default GW interface associated with the `uesimtun0` interface is also lost. Therefore, after restarting UE1, add the default GW interface as follows.
+```
 ip route add default dev uesimtun0
+```
+
+<a id="network_settings_pc1"></a>
+
+### Network settings of PC1 (Internal Node)
+
+Set `192.168.20.1/24` of UE0 as the default GW on PC1.
+```
+ip route change default via 192.168.20.1
+```
+
+<a id="network_settings_pc2"></a>
+
+### Network settings of PC2 (Internal Node)
+
+Set `192.168.21.1/24` of UE1 as the default GW on PC2.
+```
+ip route change default via 192.168.21.1
+```
+
+<a id="network_settings_pc3"></a>
+
+### Network settings of PC3 (Internal Node)
+
+Set `192.168.22.1/24` of UE1 as the default GW on PC3.
+```
+ip route change default via 192.168.22.1
 ```
 
 <a id="add_framed_routes"></a>
@@ -409,7 +480,7 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
 ```json
 {
   "_id": {
-    "$oid": "660010644d5ed1026c8029aa"
+    "$oid": "672e210b2a5baf13e3c51a26"
   },
   "ambr": {
     "downlink": {
@@ -439,13 +510,13 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
     "op": null,
     "opc": "E8ED289D EBA952E4 283B54E8 8E6183CA",
     "sqn": {
-      "$numberLong": "705"
+      "$numberLong": "1344"
     }
   },
   "slice": [
     {
       "_id": {
-        "$oid": "660010644d5ed1026c8029ab"
+        "$oid": "672e210b2a5baf13e3c51a27"
       },
       "sst": 1,
       "default_indicator": true,
@@ -470,7 +541,7 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
             }
           },
           "_id": {
-            "$oid": "660010644d5ed1026c8029ac"
+            "$oid": "672e210b2a5baf13e3c51a28"
           },
 -->       "ipv4_framed_routes": [
 -->         "192.168.20.0/24"
@@ -495,7 +566,7 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
 ```json
 {
   "_id": {
-    "$oid": "66066e30a4ac04026e67b4d6"
+    "$oid": "691e43a812ac4d03469f1cff"
   },
   "ambr": {
     "downlink": {
@@ -525,13 +596,13 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
     "op": null,
     "opc": "E8ED289D EBA952E4 283B54E8 8E6183CA",
     "sqn": {
-      "$numberLong": "129"
+      "$numberLong": "385"
     }
   },
   "slice": [
     {
       "_id": {
-        "$oid": "66066e30a4ac04026e67b4d7"
+        "$oid": "691e43a812ac4d03469f1d00"
       },
       "sst": 1,
       "default_indicator": true,
@@ -556,7 +627,7 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
             }
           },
           "_id": {
-            "$oid": "66066e30a4ac04026e67b4d8"
+            "$oid": "691e43a812ac4d03469f1d01"
           },
 -->       "ipv4_framed_routes": [
 -->         "192.168.21.0/24",
@@ -578,8 +649,8 @@ Among these, the items indicated by the arrows are Framed Routes to be added.
 ## Build Open5GS and UERANSIM
 
 Please refer to the following for building Open5GS and UERANSIM respectively.
-- Open5GS v2.7.0 (2024.03.24) - https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/
-- UERANSIM v3.2.6 (2024.03.08) - https://github.com/aligungr/UERANSIM/wiki/Installation
+- Open5GS v2.7.6 (2025.11.19) - https://open5gs.org/open5gs/docs/guide/02-building-open5gs-from-sources/
+- UERANSIM v3.2.7 (2025.10.25) - https://github.com/aligungr/UERANSIM/wiki/Installation
 
 Install MongoDB on Open5GS 5GC C-Plane machine.
 It is not necessary to install MongoDB on Open5GS 5GC U-Plane machine.
@@ -639,20 +710,20 @@ https://github.com/aligungr/UERANSIM/wiki/Usage
 Start gNodeB as follows.
 ```
 # ./nr-gnb -c ../config/open5gs-gnb.yaml
-UERANSIM v3.2.6
-[2024-03-29 17:29:05.380] [sctp] [info] Trying to establish SCTP connection... (192.168.0.111:38412)
-[2024-03-29 17:29:05.392] [sctp] [info] SCTP connection established (192.168.0.111:38412)
-[2024-03-29 17:29:05.392] [sctp] [debug] SCTP association setup ascId[9]
-[2024-03-29 17:29:05.393] [ngap] [debug] Sending NG Setup Request
-[2024-03-29 17:29:05.410] [ngap] [debug] NG Setup Response received
-[2024-03-29 17:29:05.410] [ngap] [info] NG Setup procedure is successful
+UERANSIM v3.2.7
+[2025-11-21 21:08:57.639] [sctp] [info] Trying to establish SCTP connection... (192.168.0.111:38412)
+[2025-11-21 21:08:57.642] [sctp] [info] SCTP connection established (192.168.0.111:38412)
+[2025-11-21 21:08:57.642] [sctp] [debug] SCTP association setup ascId[5]
+[2025-11-21 21:08:57.642] [ngap] [debug] Sending NG Setup Request
+[2025-11-21 21:08:57.649] [ngap] [debug] NG Setup Response received
+[2025-11-21 21:08:57.649] [ngap] [info] NG Setup procedure is successful
 ```
 The Open5GS C-Plane log when executed is as follows.
 ```
-03/29 17:29:05.413: [amf] INFO: gNB-N2 accepted[192.168.0.131]:39014 in ng-path module (../src/amf/ngap-sctp.c:113)
-03/29 17:29:05.413: [amf] INFO: gNB-N2 accepted[192.168.0.131] in master_sm module (../src/amf/amf-sm.c:754)
-03/29 17:29:05.429: [amf] INFO: [Added] Number of gNBs is now 1 (../src/amf/context.c:1236)
-03/29 17:29:05.429: [amf] INFO: gNB-N2[192.168.0.131] max_num_of_ostreams : 10 (../src/amf/amf-sm.c:793)
+11/21 21:08:57.640: [amf] INFO: gNB-N2 accepted[192.168.0.131]:40674 in ng-path module (../src/amf/ngap-sctp.c:113)
+11/21 21:08:57.640: [amf] INFO: gNB-N2 accepted[192.168.0.131] in master_sm module (../src/amf/amf-sm.c:900)
+11/21 21:08:57.646: [amf] INFO: [Added] Number of gNBs is now 1 (../src/amf/context.c:1277)
+11/21 21:08:57.647: [amf] INFO: gNB-N2[192.168.0.131] max_num_of_ostreams : 10 (../src/amf/amf-sm.c:947)
 ```
 
 <a id="start_ue0"></a>
@@ -662,130 +733,137 @@ The Open5GS C-Plane log when executed is as follows.
 Start UE0 as follows. This will register the UE with 5GC and establish a PDU session.
 ```
 # ./nr-ue -c ../config/open5gs-ue0.yaml
-UERANSIM v3.2.6
-[2024-03-29 17:29:52.625] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
-[2024-03-29 17:29:52.626] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
-[2024-03-29 17:29:52.628] [nas] [info] Selected plmn[001/01]
-[2024-03-29 17:29:52.629] [rrc] [info] Selected cell plmn[001/01] tac[1] category[SUITABLE]
-[2024-03-29 17:29:52.630] [nas] [info] UE switches to state [MM-DEREGISTERED/PS]
-[2024-03-29 17:29:52.630] [nas] [info] UE switches to state [MM-DEREGISTERED/NORMAL-SERVICE]
-[2024-03-29 17:29:52.631] [nas] [debug] Initial registration required due to [MM-DEREG-NORMAL-SERVICE]
-[2024-03-29 17:29:52.632] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
-[2024-03-29 17:29:52.633] [nas] [debug] Sending Initial Registration
-[2024-03-29 17:29:52.634] [rrc] [debug] Sending RRC Setup Request
-[2024-03-29 17:29:52.635] [nas] [info] UE switches to state [MM-REGISTER-INITIATED]
-[2024-03-29 17:29:52.636] [rrc] [info] RRC connection established
-[2024-03-29 17:29:52.637] [rrc] [info] UE switches to state [RRC-CONNECTED]
-[2024-03-29 17:29:52.638] [nas] [info] UE switches to state [CM-CONNECTED]
-[2024-03-29 17:29:52.665] [nas] [debug] Authentication Request received
-[2024-03-29 17:29:52.666] [nas] [debug] Received SQN [0000000002E1]
-[2024-03-29 17:29:52.666] [nas] [debug] SQN-MS [000000000000]
-[2024-03-29 17:29:52.684] [nas] [debug] Security Mode Command received
-[2024-03-29 17:29:52.685] [nas] [debug] Selected integrity[2] ciphering[0]
-[2024-03-29 17:29:52.720] [nas] [debug] Registration accept received
-[2024-03-29 17:29:52.721] [nas] [info] UE switches to state [MM-REGISTERED/NORMAL-SERVICE]
-[2024-03-29 17:29:52.721] [nas] [debug] Sending Registration Complete
-[2024-03-29 17:29:52.721] [nas] [info] Initial Registration is successful
-[2024-03-29 17:29:52.722] [nas] [debug] Sending PDU Session Establishment Request
-[2024-03-29 17:29:52.722] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
-[2024-03-29 17:29:52.924] [nas] [debug] Configuration Update Command received
-[2024-03-29 17:29:52.943] [nas] [debug] PDU Session Establishment Accept received
-[2024-03-29 17:29:52.948] [nas] [info] PDU Session establishment is successful PSI[1]
-[2024-03-29 17:29:52.972] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.2] is up.
+UERANSIM v3.2.7
+[2025-11-21 21:09:42.559] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
+[2025-11-21 21:09:42.560] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
+[2025-11-21 21:09:42.560] [nas] [info] Selected plmn[001/01]
+[2025-11-21 21:09:42.560] [rrc] [info] Selected cell plmn[001/01] tac[1] category[SUITABLE]
+[2025-11-21 21:09:42.560] [nas] [info] UE switches to state [MM-DEREGISTERED/PS]
+[2025-11-21 21:09:42.560] [nas] [info] UE switches to state [MM-DEREGISTERED/NORMAL-SERVICE]
+[2025-11-21 21:09:42.560] [nas] [debug] Initial registration required due to [MM-DEREG-NORMAL-SERVICE]
+[2025-11-21 21:09:42.561] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
+[2025-11-21 21:09:42.561] [nas] [debug] Sending Initial Registration
+[2025-11-21 21:09:42.561] [rrc] [debug] Sending RRC Setup Request
+[2025-11-21 21:09:42.561] [nas] [info] UE switches to state [MM-REGISTER-INITIATED]
+[2025-11-21 21:09:42.562] [rrc] [info] RRC connection established
+[2025-11-21 21:09:42.562] [rrc] [info] UE switches to state [RRC-CONNECTED]
+[2025-11-21 21:09:42.562] [nas] [info] UE switches to state [CM-CONNECTED]
+[2025-11-21 21:09:42.568] [nas] [debug] Authentication Request received
+[2025-11-21 21:09:42.568] [nas] [debug] Received SQN [000000000540]
+[2025-11-21 21:09:42.568] [nas] [debug] SQN-MS [000000000000]
+[2025-11-21 21:09:42.572] [nas] [debug] Security Mode Command received
+[2025-11-21 21:09:42.572] [nas] [debug] Selected integrity[2] ciphering[0]
+[2025-11-21 21:09:42.584] [nas] [debug] Registration accept received
+[2025-11-21 21:09:42.584] [nas] [info] UE switches to state [MM-REGISTERED/NORMAL-SERVICE]
+[2025-11-21 21:09:42.584] [nas] [debug] Sending Registration Complete
+[2025-11-21 21:09:42.584] [nas] [info] Initial Registration is successful
+[2025-11-21 21:09:42.584] [nas] [debug] Sending PDU Session Establishment Request
+[2025-11-21 21:09:42.586] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
+[2025-11-21 21:09:42.792] [nas] [debug] Configuration Update Command received
+[2025-11-21 21:09:42.805] [nas] [debug] PDU Session Establishment Accept received
+[2025-11-21 21:09:42.805] [nas] [info] PDU Session establishment is successful PSI[1]
+[2025-11-21 21:09:42.825] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.2] is up.
 ```
 The Open5GS C-Plane log when executed is as follows.
 ```
-03/29 17:29:52.638: [amf] INFO: InitialUEMessage (../src/amf/ngap-handler.c:401)
-03/29 17:29:52.638: [amf] INFO: [Added] Number of gNB-UEs is now 1 (../src/amf/context.c:2656)
-03/29 17:29:52.638: [amf] INFO:     RAN_UE_NGAP_ID[1] AMF_UE_NGAP_ID[1] TAC[1] CellID[0x10] (../src/amf/ngap-handler.c:562)
-03/29 17:29:52.638: [amf] INFO: [suci-0-001-01-0000-0-0-0000000000] Unknown UE by SUCI (../src/amf/context.c:1840)
-03/29 17:29:52.639: [amf] INFO: [Added] Number of AMF-UEs is now 1 (../src/amf/context.c:1621)
-03/29 17:29:52.639: [gmm] INFO: Registration request (../src/amf/gmm-sm.c:1224)
-03/29 17:29:52.639: [gmm] INFO: [suci-0-001-01-0000-0-0-0000000000]    SUCI (../src/amf/gmm-handler.c:172)
-03/29 17:29:52.646: [sbi] WARNING: [UDM] (NRF-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.647: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.647: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.648: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.648: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.649: [sbi] INFO: [UDM] (NF-discover) NF Profile updated [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.659: [sbi] INFO: [UDM] (SCP-discover) NF registered [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/path.c:211)
-03/29 17:29:52.712: [sbi] WARNING: [UDR] (NRF-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.713: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.713: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.714: [sbi] INFO: [UDR] (NF-discover) NF Profile updated [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.716: [sbi] INFO: [UDR] (SCP-discover) NF registered [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/path.c:211)
-03/29 17:29:52.923: [gmm] INFO: [imsi-001010000000000] Registration complete (../src/amf/gmm-sm.c:2321)
-03/29 17:29:52.923: [amf] INFO: [imsi-001010000000000] Configuration update command (../src/amf/nas-path.c:591)
-03/29 17:29:52.923: [gmm] INFO:     UTC [2024-03-29T08:29:52] Timezone[0]/DST[0] (../src/amf/gmm-build.c:558)
-03/29 17:29:52.923: [gmm] INFO:     LOCAL [2024-03-29T17:29:52] Timezone[32400]/DST[0] (../src/amf/gmm-build.c:563)
-03/29 17:29:52.923: [amf] INFO: [Added] Number of AMF-Sessions is now 1 (../src/amf/context.c:2677)
-03/29 17:29:52.924: [gmm] INFO: UE SUPI[imsi-001010000000000] DNN[internet] S_NSSAI[SST:1 SD:0xffffff] smContextRef [NULL] (../src/amf/gmm-handler.c:1285)
-03/29 17:29:52.924: [gmm] INFO: SMF Instance [60254b14-eda6-41ee-ba70-290c6ff4e539] (../src/amf/gmm-handler.c:1324)
-03/29 17:29:52.925: [smf] INFO: [Added] Number of SMF-UEs is now 1 (../src/smf/context.c:1019)
-03/29 17:29:52.925: [smf] INFO: [Added] Number of SMF-Sessions is now 1 (../src/smf/context.c:3090)
-03/29 17:29:52.926: [sbi] WARNING: [UDM] (NRF-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.926: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.926: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.927: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.927: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.927: [sbi] INFO: [UDM] (NF-discover) NF Profile updated [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.929: [sbi] INFO: [UDM] (SCP-discover) NF registered [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/path.c:211)
-03/29 17:29:52.931: [sbi] WARNING: [PCF] (NRF-discover) NF has already been added [601a21bc-eda6-41ee-a31a-2f41d8b49ba5:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.931: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.931: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.931: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.931: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.932: [sbi] INFO: [PCF] (NF-discover) NF Profile updated [601a21bc-eda6-41ee-a31a-2f41d8b49ba5:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.933: [sbi] WARNING: [UDR] (NRF-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.933: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.933: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.933: [sbi] INFO: [UDR] (NF-discover) NF Profile updated [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.934: [sbi] WARNING: [UDR] (SCP-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:2] (../lib/sbi/path.c:216)
-03/29 17:29:52.935: [sbi] WARNING: [BSF] (NRF-discover) NF has already been added [601239de-eda6-41ee-99ab-b77236a98db8:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.935: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.15:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.936: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.15:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.936: [sbi] INFO: [BSF] (NF-discover) NF Profile updated [601239de-eda6-41ee-99ab-b77236a98db8:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.937: [sbi] INFO: [BSF] (SCP-discover) NF registered [601239de-eda6-41ee-99ab-b77236a98db8:1] (../lib/sbi/path.c:211)
-03/29 17:29:52.938: [sbi] INFO: [PCF] (SCP-discover) NF registered [601a21bc-eda6-41ee-a31a-2f41d8b49ba5:1] (../lib/sbi/path.c:211)
-03/29 17:29:52.938: [smf] INFO: UE SUPI[imsi-001010000000000] DNN[internet] IPv4[10.45.0.2] IPv6[] (../src/smf/npcf-handler.c:542)
-03/29 17:29:52.939: [gtp] INFO: gtp_connect() [192.168.0.112]:2152 (../lib/gtp/path.c:60)
-03/29 17:29:52.944: [sbi] WARNING: [UDM] (NRF-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:52.944: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:80] (../lib/sbi/context.c:2210)
-03/29 17:29:52.944: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.945: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.945: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:52.945: [sbi] INFO: [UDM] (NF-discover) NF Profile updated [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:52.946: [sbi] WARNING: [UDM] (SCP-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:2] (../lib/sbi/path.c:216)
-03/29 17:29:52.947: [amf] INFO: [imsi-001010000000000:1:11][0:0:NULL] /nsmf-pdusession/v1/sm-contexts/{smContextRef}/modify (../src/amf/nsmf-handler.c:867)
+11/21 21:09:42.708: [amf] INFO: InitialUEMessage (../src/amf/ngap-handler.c:461)
+11/21 21:09:42.708: [amf] INFO: [Added] Number of gNB-UEs is now 1 (../src/amf/context.c:2775)
+11/21 21:09:42.708: [amf] INFO:     RAN_UE_NGAP_ID[1] AMF_UE_NGAP_ID[1] TAC[1] CellID[0x10] (../src/amf/ngap-handler.c:622)
+11/21 21:09:42.708: [amf] INFO: [suci-0-001-01-0000-0-0-0000000000] Unknown UE by SUCI (../src/amf/context.c:1912)
+11/21 21:09:42.708: [amf] INFO: [Added] Number of AMF-UEs is now 1 (../src/amf/context.c:1688)
+11/21 21:09:42.708: [gmm] INFO: Registration request (../src/amf/gmm-sm.c:1623)
+11/21 21:09:42.708: [gmm] INFO: [suci-0-001-01-0000-0-0-0000000000]    SUCI (../src/amf/gmm-handler.c:183)
+11/21 21:09:42.708: [sbi] INFO: [d3c611be-c6d2-41f0-8386-594833b1d9b7] Setup NF Instance [type:AUSF] (../lib/sbi/path.c:307)
+11/21 21:09:42.708: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.11:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.709: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:09:42.709: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.709: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:09:42.710: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.712: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.11:7777] (../src/amf/nausf-handler.c:130)
+11/21 21:09:42.713: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.11:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.714: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.714: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.716: [ausf] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/ausf/nudm-handler.c:337)
+11/21 21:09:42.718: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:09:42.718: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.719: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.720: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:09:42.720: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.720: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.722: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.722: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.724: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.724: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.725: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/amf/nudm-handler.c:361)
+11/21 21:09:42.725: [sbi] INFO: [d3c7fab0-c6d2-41f0-9d72-39782bf7d5df] Setup NF Instance [type:PCF] (../lib/sbi/path.c:307)
+11/21 21:09:42.725: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.726: [pcf] INFO: Setup NF EndPoint(addr) [127.0.0.5:7777] (../src/pcf/npcf-handler.c:114)
+11/21 21:09:42.726: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:09:42.726: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.728: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/amf/npcf-handler.c:143)
+11/21 21:09:42.937: [gmm] INFO: [imsi-001010000000000] Registration complete (../src/amf/gmm-sm.c:3001)
+11/21 21:09:42.937: [amf] INFO: [imsi-001010000000000] Configuration update command (../src/amf/nas-path.c:609)
+11/21 21:09:42.937: [gmm] INFO:     UTC [2025-11-21T12:09:42] Timezone[0]/DST[0] (../src/amf/gmm-build.c:551)
+11/21 21:09:42.937: [gmm] INFO:     LOCAL [2025-11-21T21:09:42] Timezone[32400]/DST[0] (../src/amf/gmm-build.c:556)
+11/21 21:09:42.937: [amf] INFO: [Added] Number of AMF-Sessions is now 1 (../src/amf/context.c:2796)
+11/21 21:09:42.937: [gmm] INFO: UE SUPI[imsi-001010000000000] DNN[internet] LBO[0] S_NSSAI[SST:1 SD:0xffffff] smContextRef[NULL] smContextResourceURI[NULL] (../src/amf/gmm-handler.c:1416)
+11/21 21:09:42.937: [gmm] INFO: V-SMF Instance [d3d8d40c-c6d2-41f0-b63a-258514c009d9](LIST) (../src/amf/gmm-handler.c:1493)
+11/21 21:09:42.937: [gmm] INFO: [d3d8d40c-c6d2-41f0-b63a-258514c009d9] Setup NF Instance [type:SMF] (../src/amf/gmm-handler.c:1495)
+11/21 21:09:42.937: [gmm] INFO: V-SMF Instance [d3d8d40c-c6d2-41f0-b63a-258514c009d9] (../src/amf/gmm-handler.c:1505)
+11/21 21:09:42.937: [gmm] INFO: V-SMF discovered in Non-Roaming or LBO-Roaming[0] (../src/amf/gmm-handler.c:1574)
+11/21 21:09:42.937: [gmm] INFO: nsmf_pdusession [1:0x6416a2a64c70:(nil)] (../src/amf/gmm-handler.c:1614)
+11/21 21:09:42.937: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.938: [smf] INFO: [Added] Number of SMF-UEs is now 1 (../src/smf/context.c:1069)
+11/21 21:09:42.938: [smf] INFO: [Added] Number of SMF-Sessions is now 1 (../src/smf/context.c:3381)
+11/21 21:09:42.938: [smf] INFO: Setup NF EndPoint(addr) [127.0.0.5:7777] (../src/smf/nsmf-handler.c:331)
+11/21 21:09:42.939: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:09:42.939: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.939: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.941: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.942: [smf] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/smf/nudm-handler.c:456)
+11/21 21:09:42.942: [sbi] INFO: [d3c7fab0-c6d2-41f0-9d72-39782bf7d5df] Setup NF Instance [type:PCF] (../lib/sbi/path.c:307)
+11/21 21:09:42.942: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.943: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/amf/nsmf-handler.c:144)
+11/21 21:09:42.943: [pcf] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/pcf/npcf-handler.c:450)
+11/21 21:09:42.943: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:09:42.944: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.944: [sbi] INFO: [d3c45a36-c6d2-41f0-a349-a7749bea8301] Setup NF Instance [type:BSF] (../lib/sbi/path.c:307)
+11/21 21:09:42.945: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.15:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.945: [pcf] INFO: Setup NF EndPoint(addr) [127.0.0.15:7777] (../src/pcf/nbsf-handler.c:121)
+11/21 21:09:42.946: [smf] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/smf/npcf-handler.c:369)
+11/21 21:09:42.946: [smf] INFO: UE SUPI[imsi-001010000000000] DNN[internet] IPv4[10.45.0.2] IPv6[] (../src/smf/npcf-handler.c:590)
+11/21 21:09:42.947: [gtp] INFO: gtp_connect() [192.168.0.112]:2152 (../lib/gtp/path.c:60)
+11/21 21:09:42.948: [sbi] INFO: [d28e0cca-c6d2-41f0-ba9c-f3e1e7e34db1] Setup NF Instance [type:AMF] (../lib/sbi/path.c:307)
+11/21 21:09:42.948: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.5:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.951: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.951: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:09:42.952: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.952: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:09:42.952: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:09:42.953: [amf] INFO: [imsi-001010000000000:1:11][0:0:NULL] /nsmf-pdusession/v1/sm-contexts/{smContextRef}/modify (../src/amf/nsmf-handler.c:947)
 ```
 The Open5GS U-Plane log when executed is as follows.
 ```
-03/29 17:29:52.928: [upf] INFO: [Added] Number of UPF-Sessions is now 1 (../src/upf/context.c:208)
-03/29 17:29:52.928: [gtp] INFO: gtp_connect() [192.168.0.111]:2152 (../lib/gtp/path.c:60)
-03/29 17:29:52.928: [upf] INFO: UE F-SEID[UP:0x18c CP:0x88b] APN[internet] PDN-Type[1] IPv4[10.45.0.2] IPv6[] (../src/upf/context.c:485)
-03/29 17:29:52.928: [upf] INFO: UE F-SEID[UP:0x18c CP:0x88b] APN[internet] PDN-Type[1] IPv4[10.45.0.2] IPv6[] (../src/upf/context.c:485)
+11/21 21:09:42.955: [upf] INFO: [Added] Number of UPF-Sessions is now 1 (../src/upf/context.c:212)
+11/21 21:09:42.955: [gtp] INFO: gtp_connect() [192.168.0.111]:2152 (../lib/gtp/path.c:60)
+11/21 21:09:42.955: [upf] INFO: UE F-SEID[UP:0x983 CP:0x4fb] APN[internet] PDN-Type[1] IPv4[10.45.0.2] IPv6[] (../src/upf/context.c:498)
+11/21 21:09:42.959: [gtp] INFO: gtp_connect() [192.168.0.131]:2152 (../lib/gtp/path.c:60)
 ```
 Looking at the console log of the `nr-ue` command, UE0 has been assigned the IP address `10.45.0.2` from Open5GS 5GC.
 ```
-[2024-03-29 17:29:52.972] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.2] is up.
+[2025-11-21 21:09:42.825] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.2] is up.
 ```
 Just in case, make sure it matches the IP address of the UE0's TUNnel interface.
 ```
 # ip addr show
 ...
-10: uesimtun0: <POINTOPOINT,PROMISC,NOTRAILERS,UP,LOWER_UP> mtu 1400 qdisc fq_codel state UNKNOWN group default qlen 500
+9: uesimtun0: <POINTOPOINT,PROMISC,NOTRAILERS,UP,LOWER_UP> mtu 1400 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none 
-    inet 10.45.0.2/32 scope global uesimtun0
+    inet 10.45.0.2/24 scope global uesimtun0
        valid_lft forever preferred_lft forever
-    inet6 fe80::3348:b3:4cba:2947/64 scope link stable-privacy 
+    inet6 fe80::9a1f:1162:694f:575c/64 scope link stable-privacy 
        valid_lft forever preferred_lft forever
 ...
-```
-- Run `tcpdump` on VM4 to confirm Framed Routing of UE0
-```
-# tcpdump -i uesimtun0 -n
-tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
-listening on uesimtun0, link-type RAW (Raw IP), capture size 262144 bytes
 ```
 **Don't forget [Network settings of UERANSIM UE0](#network_settings_ue0).**
 
@@ -796,110 +874,122 @@ listening on uesimtun0, link-type RAW (Raw IP), capture size 262144 bytes
 Start UE1 as follows. This will register the UE with 5GC and establish a PDU session.
 ```
 # ./nr-ue -c ../config/open5gs-ue1.yaml 
-UERANSIM v3.2.6
-[2024-03-29 17:29:59.366] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
-[2024-03-29 17:29:59.367] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
-[2024-03-29 17:29:59.369] [nas] [info] Selected plmn[001/01]
-[2024-03-29 17:29:59.370] [rrc] [info] Selected cell plmn[001/01] tac[1] category[SUITABLE]
-[2024-03-29 17:29:59.370] [nas] [info] UE switches to state [MM-DEREGISTERED/PS]
-[2024-03-29 17:29:59.371] [nas] [info] UE switches to state [MM-DEREGISTERED/NORMAL-SERVICE]
-[2024-03-29 17:29:59.371] [nas] [debug] Initial registration required due to [MM-DEREG-NORMAL-SERVICE]
-[2024-03-29 17:29:59.375] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
-[2024-03-29 17:29:59.375] [nas] [debug] Sending Initial Registration
-[2024-03-29 17:29:59.376] [rrc] [debug] Sending RRC Setup Request
-[2024-03-29 17:29:59.377] [nas] [info] UE switches to state [MM-REGISTER-INITIATED]
-[2024-03-29 17:29:59.378] [rrc] [info] RRC connection established
-[2024-03-29 17:29:59.379] [rrc] [info] UE switches to state [RRC-CONNECTED]
-[2024-03-29 17:29:59.379] [nas] [info] UE switches to state [CM-CONNECTED]
-[2024-03-29 17:29:59.401] [nas] [debug] Authentication Request received
-[2024-03-29 17:29:59.401] [nas] [debug] Received SQN [0000000000C1]
-[2024-03-29 17:29:59.402] [nas] [debug] SQN-MS [000000000000]
-[2024-03-29 17:29:59.417] [nas] [debug] Security Mode Command received
-[2024-03-29 17:29:59.418] [nas] [debug] Selected integrity[2] ciphering[0]
-[2024-03-29 17:29:59.460] [nas] [debug] Registration accept received
-[2024-03-29 17:29:59.460] [nas] [info] UE switches to state [MM-REGISTERED/NORMAL-SERVICE]
-[2024-03-29 17:29:59.461] [nas] [debug] Sending Registration Complete
-[2024-03-29 17:29:59.461] [nas] [info] Initial Registration is successful
-[2024-03-29 17:29:59.462] [nas] [debug] Sending PDU Session Establishment Request
-[2024-03-29 17:29:59.462] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
-[2024-03-29 17:29:59.669] [nas] [debug] Configuration Update Command received
-[2024-03-29 17:29:59.728] [nas] [debug] PDU Session Establishment Accept received
-[2024-03-29 17:29:59.733] [nas] [info] PDU Session establishment is successful PSI[1]
-[2024-03-29 17:29:59.767] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.3] is up.
+UERANSIM v3.2.7
+[2025-11-21 21:14:01.812] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
+[2025-11-21 21:14:01.813] [rrc] [debug] New signal detected for cell[1], total [1] cells in coverage
+[2025-11-21 21:14:01.814] [nas] [info] Selected plmn[001/01]
+[2025-11-21 21:14:01.814] [rrc] [info] Selected cell plmn[001/01] tac[1] category[SUITABLE]
+[2025-11-21 21:14:01.814] [nas] [info] UE switches to state [MM-DEREGISTERED/PS]
+[2025-11-21 21:14:01.814] [nas] [info] UE switches to state [MM-DEREGISTERED/NORMAL-SERVICE]
+[2025-11-21 21:14:01.814] [nas] [debug] Initial registration required due to [MM-DEREG-NORMAL-SERVICE]
+[2025-11-21 21:14:01.816] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
+[2025-11-21 21:14:01.816] [nas] [debug] Sending Initial Registration
+[2025-11-21 21:14:01.816] [rrc] [debug] Sending RRC Setup Request
+[2025-11-21 21:14:01.816] [nas] [info] UE switches to state [MM-REGISTER-INITIATED]
+[2025-11-21 21:14:01.817] [rrc] [info] RRC connection established
+[2025-11-21 21:14:01.817] [rrc] [info] UE switches to state [RRC-CONNECTED]
+[2025-11-21 21:14:01.817] [nas] [info] UE switches to state [CM-CONNECTED]
+[2025-11-21 21:14:01.823] [nas] [debug] Authentication Request received
+[2025-11-21 21:14:01.823] [nas] [debug] Received SQN [000000000181]
+[2025-11-21 21:14:01.823] [nas] [debug] SQN-MS [000000000000]
+[2025-11-21 21:14:01.827] [nas] [debug] Security Mode Command received
+[2025-11-21 21:14:01.827] [nas] [debug] Selected integrity[2] ciphering[0]
+[2025-11-21 21:14:01.839] [nas] [debug] Registration accept received
+[2025-11-21 21:14:01.839] [nas] [info] UE switches to state [MM-REGISTERED/NORMAL-SERVICE]
+[2025-11-21 21:14:01.839] [nas] [debug] Sending Registration Complete
+[2025-11-21 21:14:01.839] [nas] [info] Initial Registration is successful
+[2025-11-21 21:14:01.839] [nas] [debug] Sending PDU Session Establishment Request
+[2025-11-21 21:14:01.839] [nas] [debug] UAC access attempt is allowed for identity[0], category[MO_sig]
+[2025-11-21 21:14:02.041] [nas] [debug] Configuration Update Command received
+[2025-11-21 21:14:02.053] [nas] [debug] PDU Session Establishment Accept received
+[2025-11-21 21:14:02.056] [nas] [info] PDU Session establishment is successful PSI[1]
+[2025-11-21 21:14:02.077] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.3] is up.
 ```
 The Open5GS C-Plane log when executed is as follows.
 ```
-03/29 17:29:59.367: [amf] INFO: InitialUEMessage (../src/amf/ngap-handler.c:401)
-03/29 17:29:59.367: [amf] INFO: [Added] Number of gNB-UEs is now 2 (../src/amf/context.c:2656)
-03/29 17:29:59.367: [amf] INFO:     RAN_UE_NGAP_ID[2] AMF_UE_NGAP_ID[2] TAC[1] CellID[0x10] (../src/amf/ngap-handler.c:562)
-03/29 17:29:59.368: [amf] INFO: [suci-0-001-01-0000-0-0-0000000001] Unknown UE by SUCI (../src/amf/context.c:1840)
-03/29 17:29:59.368: [amf] INFO: [Added] Number of AMF-UEs is now 2 (../src/amf/context.c:1621)
-03/29 17:29:59.368: [gmm] INFO: Registration request (../src/amf/gmm-sm.c:1224)
-03/29 17:29:59.368: [gmm] INFO: [suci-0-001-01-0000-0-0-0000000001]    SUCI (../src/amf/gmm-handler.c:172)
-03/29 17:29:59.373: [sbi] WARNING: [UDM] (NRF-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.373: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.374: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.375: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.375: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.376: [sbi] INFO: [UDM] (NF-discover) NF Profile updated [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.384: [sbi] WARNING: [UDM] (SCP-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:2] (../lib/sbi/path.c:216)
-03/29 17:29:59.437: [sbi] WARNING: [UDR] (NRF-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.438: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.438: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.439: [sbi] INFO: [UDR] (NF-discover) NF Profile updated [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.441: [sbi] WARNING: [UDR] (SCP-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:3] (../lib/sbi/path.c:216)
-03/29 17:29:59.652: [gmm] INFO: [imsi-001010000000001] Registration complete (../src/amf/gmm-sm.c:2321)
-03/29 17:29:59.652: [amf] INFO: [imsi-001010000000001] Configuration update command (../src/amf/nas-path.c:591)
-03/29 17:29:59.653: [gmm] INFO:     UTC [2024-03-29T08:29:59] Timezone[0]/DST[0] (../src/amf/gmm-build.c:558)
-03/29 17:29:59.654: [gmm] INFO:     LOCAL [2024-03-29T17:29:59] Timezone[32400]/DST[0] (../src/amf/gmm-build.c:563)
-03/29 17:29:59.655: [amf] INFO: [Added] Number of AMF-Sessions is now 2 (../src/amf/context.c:2677)
-03/29 17:29:59.656: [gmm] INFO: UE SUPI[imsi-001010000000001] DNN[internet] S_NSSAI[SST:1 SD:0xffffff] smContextRef [NULL] (../src/amf/gmm-handler.c:1285)
-03/29 17:29:59.656: [gmm] INFO: SMF Instance [60254b14-eda6-41ee-ba70-290c6ff4e539] (../src/amf/gmm-handler.c:1324)
-03/29 17:29:59.660: [smf] INFO: [Added] Number of SMF-UEs is now 2 (../src/smf/context.c:1019)
-03/29 17:29:59.660: [smf] INFO: [Added] Number of SMF-Sessions is now 2 (../src/smf/context.c:3090)
-03/29 17:29:59.664: [sbi] WARNING: [UDM] (NRF-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.665: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.666: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.666: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.667: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.668: [sbi] INFO: [UDM] (NF-discover) NF Profile updated [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.677: [sbi] WARNING: [UDM] (SCP-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:3] (../lib/sbi/path.c:216)
-03/29 17:29:59.682: [sbi] WARNING: [PCF] (NRF-discover) NF has already been added [601a21bc-eda6-41ee-a31a-2f41d8b49ba5:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.683: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.684: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.684: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.685: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.13:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.685: [sbi] INFO: [PCF] (NF-discover) NF Profile updated [601a21bc-eda6-41ee-a31a-2f41d8b49ba5:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.691: [sbi] WARNING: [UDR] (NRF-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.692: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.692: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.20:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.692: [sbi] INFO: [UDR] (NF-discover) NF Profile updated [6019e95e-eda6-41ee-8072-392145ccd024:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.696: [sbi] WARNING: [UDR] (SCP-discover) NF has already been added [6019e95e-eda6-41ee-8072-392145ccd024:4] (../lib/sbi/path.c:216)
-03/29 17:29:59.699: [sbi] WARNING: [BSF] (NRF-discover) NF has already been added [601239de-eda6-41ee-99ab-b77236a98db8:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.700: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.15:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.700: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.15:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.701: [sbi] INFO: [BSF] (NF-discover) NF Profile updated [601239de-eda6-41ee-99ab-b77236a98db8:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.703: [sbi] WARNING: [BSF] (SCP-discover) NF has already been added [601239de-eda6-41ee-99ab-b77236a98db8:2] (../lib/sbi/path.c:216)
-03/29 17:29:59.706: [sbi] WARNING: [PCF] (SCP-discover) NF has already been added [601a21bc-eda6-41ee-a31a-2f41d8b49ba5:2] (../lib/sbi/path.c:216)
-03/29 17:29:59.707: [smf] INFO: UE SUPI[imsi-001010000000001] DNN[internet] IPv4[10.45.0.3] IPv6[] (../src/smf/npcf-handler.c:542)
-03/29 17:29:59.719: [sbi] WARNING: [UDM] (NRF-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1162)
-03/29 17:29:59.720: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:80] (../lib/sbi/context.c:2210)
-03/29 17:29:59.720: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.721: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.721: [sbi] WARNING: NF EndPoint(addr) updated [127.0.0.12:7777] (../lib/sbi/context.c:1946)
-03/29 17:29:59.721: [sbi] INFO: [UDM] (NF-discover) NF Profile updated [6012ae5a-eda6-41ee-a502-39adaacc8462:1] (../lib/sbi/nnrf-handler.c:1200)
-03/29 17:29:59.725: [sbi] WARNING: [UDM] (SCP-discover) NF has already been added [6012ae5a-eda6-41ee-a502-39adaacc8462:4] (../lib/sbi/path.c:216)
-03/29 17:29:59.726: [amf] INFO: [imsi-001010000000001:1:11][0:0:NULL] /nsmf-pdusession/v1/sm-contexts/{smContextRef}/modify (../src/amf/nsmf-handler.c:867)
+11/21 21:14:01.746: [amf] INFO: InitialUEMessage (../src/amf/ngap-handler.c:461)
+11/21 21:14:01.746: [amf] INFO: [Added] Number of gNB-UEs is now 2 (../src/amf/context.c:2775)
+11/21 21:14:01.746: [amf] INFO:     RAN_UE_NGAP_ID[2] AMF_UE_NGAP_ID[2] TAC[1] CellID[0x10] (../src/amf/ngap-handler.c:622)
+11/21 21:14:01.746: [amf] INFO: [suci-0-001-01-0000-0-0-0000000001] Unknown UE by SUCI (../src/amf/context.c:1912)
+11/21 21:14:01.746: [amf] INFO: [Added] Number of AMF-UEs is now 2 (../src/amf/context.c:1688)
+11/21 21:14:01.746: [gmm] INFO: Registration request (../src/amf/gmm-sm.c:1623)
+11/21 21:14:01.746: [gmm] INFO: [suci-0-001-01-0000-0-0-0000000001]    SUCI (../src/amf/gmm-handler.c:183)
+11/21 21:14:01.746: [sbi] INFO: [d3c611be-c6d2-41f0-8386-594833b1d9b7] Setup NF Instance [type:AUSF] (../lib/sbi/path.c:307)
+11/21 21:14:01.746: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.11:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.747: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:14:01.747: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.748: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:14:01.748: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.750: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.11:7777] (../src/amf/nausf-handler.c:130)
+11/21 21:14:01.751: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.11:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.752: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.752: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.754: [ausf] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/ausf/nudm-handler.c:337)
+11/21 21:14:01.756: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:14:01.756: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.756: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.758: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:14:01.758: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.758: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.760: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.760: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.761: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.762: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.763: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/amf/nudm-handler.c:361)
+11/21 21:14:01.763: [sbi] INFO: [d3c7fab0-c6d2-41f0-9d72-39782bf7d5df] Setup NF Instance [type:PCF] (../lib/sbi/path.c:307)
+11/21 21:14:01.763: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.764: [pcf] INFO: Setup NF EndPoint(addr) [127.0.0.5:7777] (../src/pcf/npcf-handler.c:114)
+11/21 21:14:01.764: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:14:01.764: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.766: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/amf/npcf-handler.c:143)
+11/21 21:14:01.969: [gmm] INFO: [imsi-001010000000001] Registration complete (../src/amf/gmm-sm.c:3001)
+11/21 21:14:01.969: [amf] INFO: [imsi-001010000000001] Configuration update command (../src/amf/nas-path.c:609)
+11/21 21:14:01.969: [gmm] INFO:     UTC [2025-11-21T12:14:01] Timezone[0]/DST[0] (../src/amf/gmm-build.c:551)
+11/21 21:14:01.969: [gmm] INFO:     LOCAL [2025-11-21T21:14:01] Timezone[32400]/DST[0] (../src/amf/gmm-build.c:556)
+11/21 21:14:01.969: [amf] INFO: [Added] Number of AMF-Sessions is now 2 (../src/amf/context.c:2796)
+11/21 21:14:01.969: [gmm] INFO: UE SUPI[imsi-001010000000001] DNN[internet] LBO[0] S_NSSAI[SST:1 SD:0xffffff] smContextRef[NULL] smContextResourceURI[NULL] (../src/amf/gmm-handler.c:1416)
+11/21 21:14:01.969: [gmm] INFO: V-SMF Instance [d3d8d40c-c6d2-41f0-b63a-258514c009d9](LIST) (../src/amf/gmm-handler.c:1493)
+11/21 21:14:01.969: [gmm] INFO: [d3d8d40c-c6d2-41f0-b63a-258514c009d9] Setup NF Instance [type:SMF] (../src/amf/gmm-handler.c:1495)
+11/21 21:14:01.969: [gmm] INFO: V-SMF Instance [d3d8d40c-c6d2-41f0-b63a-258514c009d9] (../src/amf/gmm-handler.c:1505)
+11/21 21:14:01.969: [gmm] INFO: V-SMF discovered in Non-Roaming or LBO-Roaming[0] (../src/amf/gmm-handler.c:1574)
+11/21 21:14:01.969: [gmm] INFO: nsmf_pdusession [1:0x6416a2a64c70:(nil)] (../src/amf/gmm-handler.c:1614)
+11/21 21:14:01.969: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.970: [smf] INFO: [Added] Number of SMF-UEs is now 2 (../src/smf/context.c:1069)
+11/21 21:14:01.970: [smf] INFO: [Added] Number of SMF-Sessions is now 2 (../src/smf/context.c:3381)
+11/21 21:14:01.970: [smf] INFO: Setup NF EndPoint(addr) [127.0.0.5:7777] (../src/smf/nsmf-handler.c:331)
+11/21 21:14:01.970: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:14:01.970: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.971: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.973: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.974: [smf] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/smf/nudm-handler.c:456)
+11/21 21:14:01.974: [sbi] INFO: [d3c7fab0-c6d2-41f0-9d72-39782bf7d5df] Setup NF Instance [type:PCF] (../lib/sbi/path.c:307)
+11/21 21:14:01.974: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.975: [amf] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/amf/nsmf-handler.c:144)
+11/21 21:14:01.975: [pcf] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/pcf/npcf-handler.c:450)
+11/21 21:14:01.975: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:14:01.975: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.976: [sbi] INFO: [d3c45a36-c6d2-41f0-a349-a7749bea8301] Setup NF Instance [type:BSF] (../lib/sbi/path.c:307)
+11/21 21:14:01.976: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.15:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.977: [pcf] INFO: Setup NF EndPoint(addr) [127.0.0.15:7777] (../src/pcf/nbsf-handler.c:121)
+11/21 21:14:01.978: [smf] INFO: Setup NF EndPoint(addr) [127.0.0.13:7777] (../src/smf/npcf-handler.c:369)
+11/21 21:14:01.978: [smf] INFO: UE SUPI[imsi-001010000000001] DNN[internet] IPv4[10.45.0.3] IPv6[] (../src/smf/npcf-handler.c:590)
+11/21 21:14:01.979: [sbi] INFO: [d28e0cca-c6d2-41f0-ba9c-f3e1e7e34db1] Setup NF Instance [type:AMF] (../lib/sbi/path.c:307)
+11/21 21:14:01.979: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.5:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.982: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.4:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.982: [sbi] INFO: [d3c5b75a-c6d2-41f0-a9b4-e306ee97a519] Setup NF Instance [type:UDM] (../lib/sbi/path.c:307)
+11/21 21:14:01.982: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.12:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.983: [sbi] INFO: [d3c813c4-c6d2-41f0-9c70-ed45935f764a] Setup NF Instance [type:UDR] (../lib/sbi/path.c:307)
+11/21 21:14:01.983: [scp] INFO: Setup NF EndPoint(addr) [127.0.0.20:7777] (../src/scp/sbi-path.c:463)
+11/21 21:14:01.984: [amf] INFO: [imsi-001010000000001:1:11][0:0:NULL] /nsmf-pdusession/v1/sm-contexts/{smContextRef}/modify (../src/amf/nsmf-handler.c:947)
 ```
 The Open5GS U-Plane log when executed is as follows.
 ```
-03/29 17:29:59.697: [upf] INFO: [Added] Number of UPF-Sessions is now 2 (../src/upf/context.c:208)
-03/29 17:29:59.697: [upf] INFO: UE F-SEID[UP:0x38 CP:0x382] APN[internet] PDN-Type[1] IPv4[10.45.0.3] IPv6[] (../src/upf/context.c:485)
-03/29 17:29:59.697: [upf] INFO: UE F-SEID[UP:0x38 CP:0x382] APN[internet] PDN-Type[1] IPv4[10.45.0.3] IPv6[] (../src/upf/context.c:485)
+11/21 21:14:01.988: [upf] INFO: [Added] Number of UPF-Sessions is now 2 (../src/upf/context.c:212)
+11/21 21:14:01.988: [upf] INFO: UE F-SEID[UP:0x5fb CP:0xb5b] APN[internet] PDN-Type[1] IPv4[10.45.0.3] IPv6[] (../src/upf/context.c:498)
 ```
 Looking at the console log of the `nr-ue` command, UE1 has been assigned the IP address `10.45.0.3` from Open5GS 5GC.
 ```
-[2024-03-29 17:29:59.767] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.3] is up.
+[2025-11-21 21:14:02.077] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.3] is up.
 ```
 Just in case, make sure it matches the IP address of the UE1's TUNnel interface.
 ```
@@ -907,103 +997,135 @@ Just in case, make sure it matches the IP address of the UE1's TUNnel interface.
 ...
 8: uesimtun0: <POINTOPOINT,PROMISC,NOTRAILERS,UP,LOWER_UP> mtu 1400 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none 
-    inet 10.45.0.3/32 scope global uesimtun0
+    inet 10.45.0.3/24 scope global uesimtun0
        valid_lft forever preferred_lft forever
-    inet6 fe80::85c5:5c11:ad58:2ed0/64 scope link stable-privacy 
+    inet6 fe80::caef:7abf:f9d1:5fbc/64 scope link stable-privacy 
        valid_lft forever preferred_lft forever
 ...
 ```
-- Run `tcpdump` on VM5 to confirm Framed Routing of UE1
-```
-# tcpdump -i uesimtun0 -n
-tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
-listening on uesimtun0, link-type RAW (Raw IP), capture size 262144 bytes
-```
 **Don't forget [Network settings of UERANSIM UE1](#network_settings_ue1).**
 
-<h2 id="ping">Ping Framed Routes</h4>
+<a id="run_pc1"></a>
 
-<h3 id="ping_ue0">Ping IP address (192.168.20.100/24) of Framed Routes of UE0</h4>
+### Run tcpdump on PC1
 
-On UPF (VM2), ping IP address (`192.168.20.100/24`) of Framed Routes of UE0 and confirm with `tcpdump` running on VM4.
+On PC1, run `tcpdump` on `ens20` to check Frame Routing of UE0 (`192.168.20.0/24`).
+```
+# tcpdump -i ens20 -n
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on ens20, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
 
-```
-# ping 192.168.20.100 -I ogstun 
-PING 192.168.20.100 (192.168.20.100) from 10.45.0.1 ogstun: 56(84) bytes of data.
-64 bytes from 192.168.20.100: icmp_seq=1 ttl=64 time=2.55 ms
-64 bytes from 192.168.20.100: icmp_seq=2 ttl=64 time=2.82 ms
-64 bytes from 192.168.20.100: icmp_seq=3 ttl=64 time=3.00 ms
-```
-The `tcpdump` log on UE0 is as follows.
-```
-17:36:27.690302 IP 10.45.0.1 > 192.168.20.100: ICMP echo request, id 13, seq 1, length 64
-17:36:27.690343 IP 192.168.20.100 > 10.45.0.1: ICMP echo reply, id 13, seq 1, length 64
-17:36:28.690866 IP 10.45.0.1 > 192.168.20.100: ICMP echo request, id 13, seq 2, length 64
-17:36:28.690900 IP 192.168.20.100 > 10.45.0.1: ICMP echo reply, id 13, seq 2, length 64
-17:36:29.692084 IP 10.45.0.1 > 192.168.20.100: ICMP echo request, id 13, seq 3, length 64
-17:36:29.692117 IP 192.168.20.100 > 10.45.0.1: ICMP echo reply, id 13, seq 3, length 64
-```
-**Note. Confirm that no packets have arrived at UE1 (VM5).**
+<a id="run_pc2"></a>
 
-<h3 id="ping_ue11">Ping IP address (192.168.21.100/24) of Framed Routes of UE1</h4>
+### Run tcpdump on PC2
 
-On UPF (VM2), ping IP address (`192.168.21.100/24`) of Framed Routes of UE1 and confirm with `tcpdump` running on VM5.
+On PC2, run `tcpdump` on `ens20` to check Frame Routing of UE1 (`192.168.21.0/24`).
+```
+# tcpdump -i ens20 -n
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on ens20, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
 
-```
-# ping 192.168.21.100 -I ogstun 
-PING 192.168.21.100 (192.168.21.100) from 10.45.0.1 ogstun: 56(84) bytes of data.
-64 bytes from 192.168.21.100: icmp_seq=1 ttl=64 time=2.67 ms
-64 bytes from 192.168.21.100: icmp_seq=2 ttl=64 time=2.85 ms
-64 bytes from 192.168.21.100: icmp_seq=3 ttl=64 time=2.89 ms
-```
-The `tcpdump` log on UE1 is as follows.
-```
-17:37:06.682357 IP 10.45.0.1 > 192.168.21.100: ICMP echo request, id 14, seq 1, length 64
-17:37:06.682407 IP 192.168.21.100 > 10.45.0.1: ICMP echo reply, id 14, seq 1, length 64
-17:37:07.683585 IP 10.45.0.1 > 192.168.21.100: ICMP echo request, id 14, seq 2, length 64
-17:37:07.683623 IP 192.168.21.100 > 10.45.0.1: ICMP echo reply, id 14, seq 2, length 64
-17:37:08.684557 IP 10.45.0.1 > 192.168.21.100: ICMP echo request, id 14, seq 3, length 64
-17:37:08.684599 IP 192.168.21.100 > 10.45.0.1: ICMP echo reply, id 14, seq 3, length 64
-```
-**Note. Confirm that no packets have arrived at UE0 (VM4).**
+<a id="run_pc3"></a>
 
-<h3 id="ping_ue12">Ping IP address (192.168.22.100/24) of Framed Routes of UE1</h4>
+### Run tcpdump on PC3
 
-On UPF (VM2), ping IP address (`192.168.22.100/24`) of Framed Routes of UE1 and confirm with `tcpdump` running on VM5.
+On PC1, run `tcpdump` on `ens20` to check Frame Routing of UE1 (`192.168.22.0/24`).
+```
+# tcpdump -i ens20 -n
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on ens20, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
 
-```
-# ping 192.168.22.100 -I ogstun 
-PING 192.168.22.100 (192.168.22.100) from 10.45.0.1 ogstun: 56(84) bytes of data.
-64 bytes from 192.168.22.100: icmp_seq=1 ttl=64 time=0.740 ms
-64 bytes from 192.168.22.100: icmp_seq=2 ttl=64 time=0.694 ms
-64 bytes from 192.168.22.100: icmp_seq=3 ttl=64 time=0.761 ms
-```
-The `tcpdump` log on UE1 is as follows.
-```
-17:37:49.900156 IP 10.45.0.1 > 192.168.22.100: ICMP echo request, id 15, seq 1, length 64
-17:37:49.900171 IP 192.168.22.100 > 10.45.0.1: ICMP echo reply, id 15, seq 1, length 64
-17:37:50.931587 IP 10.45.0.1 > 192.168.22.100: ICMP echo request, id 15, seq 2, length 64
-17:37:50.931600 IP 192.168.22.100 > 10.45.0.1: ICMP echo reply, id 15, seq 2, length 64
-17:37:51.955624 IP 10.45.0.1 > 192.168.22.100: ICMP echo request, id 15, seq 3, length 64
-17:37:51.955637 IP 192.168.22.100 > 10.45.0.1: ICMP echo reply, id 15, seq 3, length 64
-```
-**Note. Confirm that no packets have arrived at UE0 (VM4).**
+<a id="ping"></a>
 
-<h3 id="ping_ue2">Ping IP address (192.168.23.100/24) of Framed Routes (not exist)</h4>
+## Ping Framed Routes
 
-On UPF (VM2), ping IP address (`192.168.23.100/24`) of Framed Routes which do not exist on either UE0 or UE1, and confirm no packets with `tcpdump` running on VM4 and VM5.
+<a id="ping_ue0"></a>
 
+### Ping IP address (192.168.20.100/24) of Framed Routes of UE0 on PC1
+
+On EXT (External Node), ping IP address (`192.168.20.100/24`) of Framed Routes of UE0 and confirm with `tcpdump` running on PC1.
 ```
-# ping 192.168.23.100 -I ogstun 
-PING 192.168.23.100 (192.168.23.100) from 10.45.0.1 ogstun: 56(84) bytes of data.
+# ping 192.168.20.100
+PING 192.168.20.100 (192.168.20.100) 56(84) bytes of data.
+64 bytes from 192.168.20.100: icmp_seq=1 ttl=62 time=1.31 ms
+64 bytes from 192.168.20.100: icmp_seq=2 ttl=62 time=1.24 ms
+64 bytes from 192.168.20.100: icmp_seq=3 ttl=62 time=1.23 ms
 ```
-**Make sure there are no tcpdump logs on UE0 and UE1.**
+The `tcpdump` log on PC1 is as follows.
+```
+21:36:45.601899 IP 192.168.16.152 > 192.168.20.100: ICMP echo request, id 1335, seq 1, length 64
+21:36:45.601934 IP 192.168.20.100 > 192.168.16.152: ICMP echo reply, id 1335, seq 1, length 64
+21:36:46.603340 IP 192.168.16.152 > 192.168.20.100: ICMP echo request, id 1335, seq 2, length 64
+21:36:46.603361 IP 192.168.20.100 > 192.168.16.152: ICMP echo reply, id 1335, seq 2, length 64
+21:36:47.604794 IP 192.168.16.152 > 192.168.20.100: ICMP echo request, id 1335, seq 3, length 64
+21:36:47.604814 IP 192.168.20.100 > 192.168.16.152: ICMP echo reply, id 1335, seq 3, length 64
+```
+**Note. Confirm that no packets have arrived at PC2 and PC3.**
+
+<a id="ping_ue11"></a>
+
+### Ping IP address (192.168.21.100/24) of Framed Routes of UE1 on PC2
+
+On EXT (External Node), ping IP address (`192.168.21.100/24`) of Framed Routes of UE1 and confirm with `tcpdump` running on PC2.
+```
+# ping 192.168.21.100
+PING 192.168.21.100 (192.168.21.100) 56(84) bytes of data.
+64 bytes from 192.168.21.100: icmp_seq=1 ttl=62 time=1.30 ms
+64 bytes from 192.168.21.100: icmp_seq=2 ttl=62 time=1.27 ms
+64 bytes from 192.168.21.100: icmp_seq=3 ttl=62 time=1.40 ms
+```
+The `tcpdump` log on PC2 is as follows.
+```
+21:39:33.385782 IP 192.168.16.152 > 192.168.21.100: ICMP echo request, id 1337, seq 1, length 64
+21:39:33.385823 IP 192.168.21.100 > 192.168.16.152: ICMP echo reply, id 1337, seq 1, length 64
+21:39:34.387179 IP 192.168.16.152 > 192.168.21.100: ICMP echo request, id 1337, seq 2, length 64
+21:39:34.387198 IP 192.168.21.100 > 192.168.16.152: ICMP echo reply, id 1337, seq 2, length 64
+21:39:35.388576 IP 192.168.16.152 > 192.168.21.100: ICMP echo request, id 1337, seq 3, length 64
+21:39:35.388596 IP 192.168.21.100 > 192.168.16.152: ICMP echo reply, id 1337, seq 3, length 64
+```
+**Note. Confirm that no packets have arrived at PC1 and PC3.**
+
+<a id="ping_ue12"></a>
+
+### Ping IP address (192.168.22.100/24) of Framed Routes of UE1 on PC3
+
+On EXT (External Node), ping IP address (`192.168.22.100/24`) of Framed Routes of UE1 and confirm with `tcpdump` running on PC3.
+```
+# ping 192.168.22.100
+PING 192.168.22.100 (192.168.22.100) 56(84) bytes of data.
+64 bytes from 192.168.22.100: icmp_seq=1 ttl=62 time=1.14 ms
+64 bytes from 192.168.22.100: icmp_seq=2 ttl=62 time=1.31 ms
+64 bytes from 192.168.22.100: icmp_seq=3 ttl=62 time=1.44 ms
+```
+The `tcpdump` log on PC3 is as follows.
+```
+21:42:13.223560 IP 192.168.16.152 > 192.168.22.100: ICMP echo request, id 1342, seq 1, length 64
+21:42:13.223587 IP 192.168.22.100 > 192.168.16.152: ICMP echo reply, id 1342, seq 1, length 64
+21:42:14.224933 IP 192.168.16.152 > 192.168.22.100: ICMP echo request, id 1342, seq 2, length 64
+21:42:14.224952 IP 192.168.22.100 > 192.168.16.152: ICMP echo reply, id 1342, seq 2, length 64
+21:42:15.226317 IP 192.168.16.152 > 192.168.22.100: ICMP echo request, id 1342, seq 3, length 64
+21:42:15.226338 IP 192.168.22.100 > 192.168.16.152: ICMP echo reply, id 1342, seq 3, length 64
+```
+**Note. Confirm that no packets have arrived at PC1 and PC2.**
+
+<a id="ping_ue2"></a>
+
+### Ping IP address (192.168.23.100/24) of Framed Routes (not exist)
+
+On EXT (External Node), ping IP address (`192.168.23.100/24`) of Framed Routes which do not exist on either UE0 or UE1, and confirm no packets with `tcpdump` running on PC1, PC2 and PC3.
+```
+# ping 192.168.23.100
+PING 192.168.23.100 (192.168.23.100) 56(84) bytes of data.
+```
+**Make sure there are no tcpdump logs on PC1, PC2 and PC3.**
 
 ---
 I was able to confirm the very simple configuration for Framed Routing.
 In practice, I think that PSA-UPF and UE will require more complex network routing configuration.
 In this article, I kept the minimum settings necessary to check Framed Routing.
-See [here](https://github.com/s5uishida/open5gs_5gc_ueransim_framed_routing_sample_config/issues/2#issuecomment-1464891842) for ping between UE0 and UE1, and ping between Framed routes belonging to different UEs.
 
 I would like to thank the excellent developers and all the contributors of Open5GS and UERANSIM.
 
@@ -1011,6 +1133,7 @@ I would like to thank the excellent developers and all the contributors of Open5
 
 ## Changelog (summary)
 
+- [2025.11.19] Modified the scenario to verify Framed Routing to explain it in a bit more detail.
 - [2024.03.31] [This commit](https://github.com/open5gs/open5gs/commit/e8a3b76af395a9986234b7d339a7a96dc5bb537f) fixed the issue where SMF crashes without `gtpc` section in `smf.yaml`. So deleted the `gtpc` section in `smf.yaml` for 5G use.
 - [2024.03.29] Updated to Open5GS v2.7.0 (2024.03.24).
 - [2023.03.18] Updated to Open5GS v2.6.1 (2023.03.18) and UERANSIM v3.2.6 (2023.03.17).
