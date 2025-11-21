@@ -1,6 +1,15 @@
 # Open5GS 5GC & UERANSIM UE / RAN Sample Configuration - Framed Routing
 This describes a very simple configuration that uses Open5GS and UERANSIM for Framed Routing.
 
+This feature has been merged into Open5GS via the following pull requests by <b>@mitmitmitm</b>.
+
+- [Framed routing](https://github.com/open5gs/open5gs/pull/2009)
+- [Framed routes udr](https://github.com/open5gs/open5gs/pull/2022)
+- [[SMF/PFCP] Send framed routes in both UL and DL pdrs](https://github.com/open5gs/open5gs/pull/2356)
+
+The related documents can be found below.
+- https://github.com/gonalobastos/5G-Framed-Routing
+
 ---
 
 ### [Sample Configurations and Miscellaneous for Mobile Network](https://github.com/s5uishida/sample_config_misc_for_mobile_network)
@@ -1133,6 +1142,7 @@ I would like to thank the excellent developers and all the contributors of Open5
 
 ## Changelog (summary)
 
+- [2025.11.22] Added information related to Open5GS Framed Routing feature to the top of this article.
 - [2025.11.21] Modified the scenario to verify Framed Routing to explain it in a bit more detail.
 - [2024.03.31] [This commit](https://github.com/open5gs/open5gs/commit/e8a3b76af395a9986234b7d339a7a96dc5bb537f) fixed the issue where SMF crashes without `gtpc` section in `smf.yaml`. So deleted the `gtpc` section in `smf.yaml` for 5G use.
 - [2024.03.29] Updated to Open5GS v2.7.0 (2024.03.24).
