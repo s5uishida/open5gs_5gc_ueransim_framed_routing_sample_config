@@ -1135,7 +1135,7 @@ PING 192.168.23.100 (192.168.23.100) 56(84) bytes of data.
 I was able to confirm the very simple configuration for Framed Routing.
 In practice, I think that PSA-UPF and UE will require more complex network routing configuration.
 In this article, I kept the minimum settings necessary to check Framed Routing.
-Also in this scenario, UE0 and UE1 serve as L3SW (i.e., routing only, no NAT), and you may run `ping` and `iperf3` commands bidirectionally between PC1, PC2, PC3, and EXT.
+Also in this scenario, UE0 and UE1 only serve routing and not NAT. You may run `ping` and `iperf3` commands bidirectionally between PC1, PC2, PC3, and EXT.
 
 I would like to thank the excellent developers and all the contributors of Open5GS and UERANSIM.
 
