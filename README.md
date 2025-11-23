@@ -1,7 +1,7 @@
 # Open5GS 5GC & UERANSIM UE / RAN Sample Configuration - Framed Routing
 This describes a very simple configuration that uses Open5GS and UERANSIM for Framed Routing.
 
-This feature has been merged into Open5GS via the following pull requests by <b>@mitmitmitm</b>.
+This feature has been merged into Open5GS via the following pull requests by **@mitmitmitm**.
 
 - [Framed routing](https://github.com/open5gs/open5gs/pull/2009)
 - [Framed routes udr](https://github.com/open5gs/open5gs/pull/2022)
@@ -79,21 +79,21 @@ Each VMs are as follows.
 | VM # | SW & Role | IP address | OS | Mem (Min) | HDD (Min) |
 | --- | --- | --- | --- | --- | --- |
 | VM1 | Open5GS 5GC C-Plane | 192.168.0.111/24 | Ubuntu 24.04 | 2GB | 20GB |
-| VM2 | Open5GS 5GC U-Plane  | 192.168.0.112/24<br><b>192.168.16.112/24</b> | Ubuntu 24.04 | 1GB | 20GB |
-| EXT | External Node | 192.168.0.152/24<br><b>192.168.16.152/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| VM2 | Open5GS 5GC U-Plane  | 192.168.0.112/24<br>**192.168.16.112/24** | Ubuntu 24.04 | 1GB | 20GB |
+| EXT | External Node | 192.168.0.152/24<br>**192.168.16.152/24** | Ubuntu 24.04 | 1GB | 10GB |
 | VM3 | UERANSIM RAN (gNodeB) | 192.168.0.131/24 | Ubuntu 24.04 | 1GB | 10GB |
-| VM4 | UERANSIM UE0 | 192.168.0.132/24<br><b>192.168.20.1/24</b> | Ubuntu 24.04 | 1GB | 10GB |
-| VM5 | UERANSIM UE1 | 192.168.0.133/24<br><b>192.168.21.1/24<br>192.168.22.1/24</b> | Ubuntu 24.04 | 1GB | 10GB |
-| PC1 | Internal Node | 192.168.0.161/24<br><b>192.168.20.100/24</b> | Ubuntu 24.04 | 1GB | 10GB |
-| PC2 | Internal Node | 192.168.0.162/24<br><b>192.168.21.100/24</b> | Ubuntu 24.04 | 1GB | 10GB |
-| PC3 | Internal Node | 192.168.0.163/24<br><b>192.168.22.100/24</b> | Ubuntu 24.04 | 1GB | 10GB |
+| VM4 | UERANSIM UE0 | 192.168.0.132/24<br>**192.168.20.1/24** | Ubuntu 24.04 | 1GB | 10GB |
+| VM5 | UERANSIM UE1 | 192.168.0.133/24<br>**192.168.21.1/24<br>192.168.22.1/24** | Ubuntu 24.04 | 1GB | 10GB |
+| PC1 | Internal Node | 192.168.0.161/24<br>**192.168.20.100/24** | Ubuntu 24.04 | 1GB | 10GB |
+| PC2 | Internal Node | 192.168.0.162/24<br>**192.168.21.100/24** | Ubuntu 24.04 | 1GB | 10GB |
+| PC3 | Internal Node | 192.168.0.163/24<br>**192.168.22.100/24** | Ubuntu 24.04 | 1GB | 10GB |
 
 Subscriber Information (other information is the same) is as follows.  
 **Note. Please select OP or OPc according to the setting of UERANSIM UE configuration files. As of 2023.01.29, Framed Routes cannot be set with the WebUI. Also, if you change the `open5gs-dbctl` script, it seems that you can register these with this script, but I could not register.**
 | UE # | IMSI | DNN | OP/OPc | Framed Routes | Internal IP address |
 | --- | --- | --- | --- | --- | --- |
-| UE0 | 001010000000000 | internet | OPc | <b>192.168.20.0/24</b> | <b>192.168.20.1</b> |
-| UE1 | 001010000000001 | internet | OPc | <b>192.168.21.0/24<br>192.168.22.0/24</b> | <b>192.168.21.1<br>192.168.22.1</b> |
+| UE0 | 001010000000000 | internet | OPc | **192.168.20.0/24** | **192.168.20.1** |
+| UE1 | 001010000000001 | internet | OPc | **192.168.21.0/24<br>192.168.22.0/24** | **192.168.21.1<br>192.168.22.1** |
 
 I registered these information with the Open5GS WebUI.
 In addition, [3GPP TS 35.208](https://www.3gpp.org/DynaReport/35208.htm) "4.3 Test Sets" is published by 3GPP as test data for the 3GPP authentication and key generation functions (MILENAGE).
