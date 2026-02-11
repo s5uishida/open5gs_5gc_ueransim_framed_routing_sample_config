@@ -1,4 +1,4 @@
-# Open5GS 5GC & UERANSIM UE / RAN Sample Configuration - Framed Routing
+# Open5GS 5GC & UERANSIM UE / RAN Sample Configuration - Framed Routing with Open5GS UPF
 This describes a very simple configuration that uses Open5GS and UERANSIM for Framed Routing.
 
 This feature has been merged into Open5GS via the following pull requests by **@mitmitmitm**.
