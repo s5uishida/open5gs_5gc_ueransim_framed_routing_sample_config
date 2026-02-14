@@ -77,17 +77,17 @@ The 5GC / UE / RAN used are as follows.
 - UE / RAN - UERANSIM v3.2.7 (2025.10.25) - https://github.com/aligungr/UERANSIM
 
 Each VMs are as follows.  
-| VM # | SW & Role | IP address | OS | Mem (Min) | HDD (Min) |
-| --- | --- | --- | --- | --- | --- |
-| VM1 | Open5GS 5GC C-Plane | 192.168.0.111/24<br>192.168.14.111/24 | Ubuntu 24.04 | 2GB | 20GB |
-| VM2 | Open5GS 5GC U-Plane  | 192.168.0.151/24<br>192.168.13.151/24<br>192.168.14.151/24<br>**192.168.16.151/24** | Ubuntu 24.04 | 1GB | 20GB |
-| EXT | External Node | 192.168.0.152/24<br>**192.168.16.152/24** | Ubuntu 24.04 | 1GB | 10GB |
-| VM3 | UERANSIM RAN (gNodeB) | 192.168.0.131/24<br>192.168.13.131/24 | Ubuntu 24.04 | 1GB | 10GB |
-| VM4 | UERANSIM UE0 | 192.168.0.132/24<br>**192.168.20.1/24** | Ubuntu 24.04 | 1GB | 10GB |
-| VM5 | UERANSIM UE1 | 192.168.0.133/24<br>**192.168.21.1/24<br>192.168.22.1/24** | Ubuntu 24.04 | 1GB | 10GB |
-| PC1 | Internal Node | 192.168.0.161/24<br>**192.168.20.100/24** | Ubuntu 24.04 | 1GB | 10GB |
-| PC2 | Internal Node | 192.168.0.162/24<br>**192.168.21.100/24** | Ubuntu 24.04 | 1GB | 10GB |
-| PC3 | Internal Node | 192.168.0.163/24<br>**192.168.22.100/24** | Ubuntu 24.04 | 1GB | 10GB |
+| VM # | SW & Role | IP address | OS | CPU<br>(Min) | Mem<br>(Min) | HDD<br>(Min) |
+| --- | --- | --- | --- | --- | --- | --- |
+| VM1 | Open5GS 5GC C-Plane | 192.168.0.111/24<br>192.168.14.111/24 | Ubuntu 24.04 | 1 | 2GB | 20GB |
+| VM2 | Open5GS 5GC U-Plane  | 192.168.0.151/24<br>192.168.13.151/24<br>192.168.14.151/24<br>**192.168.16.151/24** | Ubuntu 24.04 | 1 | 1GB | 20GB |
+| EXT | External Node | 192.168.0.152/24<br>**192.168.16.152/24** | Ubuntu 24.04 | 1 | 1GB | 10GB |
+| VM3 | UERANSIM RAN (gNodeB) | 192.168.0.131/24<br>192.168.13.131/24 | Ubuntu 24.04 | 1 | 1GB | 10GB |
+| VM4 | UERANSIM UE0 | 192.168.0.132/24<br>**192.168.20.1/24** | Ubuntu 24.04 | 1 | 1GB | 10GB |
+| VM5 | UERANSIM UE1 | 192.168.0.133/24<br>**192.168.21.1/24<br>192.168.22.1/24** | Ubuntu 24.04 | 1 | 1GB | 10GB |
+| PC1 | Internal Node | 192.168.0.161/24<br>**192.168.20.100/24** | Ubuntu 24.04 | 1 | 1GB | 10GB |
+| PC2 | Internal Node | 192.168.0.162/24<br>**192.168.21.100/24** | Ubuntu 24.04 | 1 | 1GB | 10GB |
+| PC3 | Internal Node | 192.168.0.163/24<br>**192.168.22.100/24** | Ubuntu 24.04 | 1 | 1GB | 10GB |
 
 Subscriber Information (other information is the same) is as follows.  
 **Note. Please select OP or OPc according to the setting of UERANSIM UE configuration files. As of 2023.01.29, Framed Routes cannot be set with the WebUI. Also, if you change the `open5gs-dbctl` script, it seems that you can register these with this script, but I could not register.**
