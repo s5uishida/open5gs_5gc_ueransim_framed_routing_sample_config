@@ -442,7 +442,6 @@ ip netns add pc1
 ip netns add pc2
 ip netns add pc3
 ```
-
 From here on, I will explain how to setup netns and veth, but please note that these settings will be applied to the netns created by running UE0 and UE1.
 In other words, run UE0 and UE1 before performing these operations.
 
