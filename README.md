@@ -96,7 +96,7 @@ Pairs of network namespaces and virtual network interfaces are follows.
 | --- | --- | --- | --- | --- | --- |
 | UE0 | ueransim-001010000000000-internet | veth-ue0-pc1 | veth-pc1 | pc1 | PC1 |
 | UE1 | ueransim-001010000000001-internet | veth-ue1-pc2 | veth-pc2 | pc2 | PC2 |
-| UE1 | ueransim-001010000000001-internet | veth-ue1-pc3 | veth-pc3 | pc3 | PC3 |
+||| veth-ue1-pc3 | veth-pc3 | pc3 | PC3 |
 
 Subscriber Information (other information is the same) is as follows.  
 **Note. Please select OP or OPc according to the setting of UERANSIM UE configuration files. As of 2023.01.29, Framed Routes cannot be set with the WebUI. Also, if you change the `open5gs-dbctl` script, it seems that you can register these with this script, but I could not register.**
