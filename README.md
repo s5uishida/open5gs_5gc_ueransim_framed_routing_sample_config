@@ -69,6 +69,9 @@ The following minimum configuration was set as a condition.
 The built simulation environment is as follows.
 
 <img src="./images/network-overview.png" title="./images/network-overview.png" width=1000px></img>
+
+The following figure shows the netns and veth pairs within VM3.
+
 <img src="./images/netns-overview.png" title="./images/netns-overview.png" width=1000px></img>
 
 The 5GC / UE / RAN used are as follows.
