@@ -795,8 +795,9 @@ The Open5GS C-Plane log when executed is as follows.
 
 #### Start UE0
 
-Start UE0 as follows. This will register the UE with 5GC and establish a PDU session.
+Move to netns:`ueransim-001010000000000-internet` and start UE0 as follows. This will register the UE with 5GC and establish a PDU session.
 ```
+# ip netns exec ueransim-001010000000000-internet bash
 # ./nr-ue -c ../config/open5gs-ue0.yaml
 UERANSIM v3.2.8
 [2026-04-26 00:58:39.487] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
@@ -919,7 +920,7 @@ Looking at the console log of the `nr-ue` command, UE0 has been assigned the IP 
 ```
 [2026-04-26 00:58:39.784] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.2] is up in namespace[ueransim-001010000000000-internet].
 ```
-Just in case, move to netns:ueransim-001010000000000-internet and make sure it matches the IP address of the UE0's TUNnel interface.
+Just in case, move to netns:`ueransim-001010000000000-internet` and make sure it matches the IP address of the UE0's TUNnel interface.
 ```
 # ip netns exec ueransim-001010000000000-internet bash
 # ip addr show
@@ -938,8 +939,9 @@ Just in case, move to netns:ueransim-001010000000000-internet and make sure it m
 
 #### Start UE1
 
-Start UE1 as follows. This will register the UE with 5GC and establish a PDU session.
+Move to netns:`ueransim-001010000000001-internet` and start UE1 as follows. This will register the UE with 5GC and establish a PDU session.
 ```
+# ip netns exec ueransim-001010000000001-internet bash
 # ./nr-ue -c ../config/open5gs-ue1.yaml 
 UERANSIM v3.2.8
 [2026-04-26 00:58:58.651] [nas] [info] UE switches to state [MM-DEREGISTERED/PLMN-SEARCH]
@@ -1059,7 +1061,7 @@ Looking at the console log of the `nr-ue` command, UE1 has been assigned the IP 
 ```
 [2026-04-26 00:58:58.932] [app] [info] Connection setup for PDU session[1] is successful, TUN interface[uesimtun0, 10.45.0.3] is up in namespace[ueransim-001010000000001-internet].
 ```
-Just in case, move to netns:ueransim-001010000000001-internet and make sure it matches the IP address of the UE1's TUNnel interface.
+Just in case, move to netns:`ueransim-001010000000001-internet` and make sure it matches the IP address of the UE1's TUNnel interface.
 ```
 # ip netns exec ueransim-001010000000001-internet bash
 # ip addr show
