@@ -796,6 +796,7 @@ The Open5GS C-Plane log when executed is as follows.
 #### Start UE0
 
 Start UE0 as follows. This will register the UE with 5GC and establish a PDU session.
+Also, UE0 moves to netns:`ueransim-001010000000000-internet` and runs there.
 ```
 # ./nr-ue -c ../config/open5gs-ue0.yaml
 UERANSIM v3.2.8
@@ -939,6 +940,7 @@ Just in case, after logging in VM3 from another terminal, move to netns:`ueransi
 #### Start UE1
 
 Start UE1 as follows. This will register the UE with 5GC and establish a PDU session.
+Also, UE1 moves to netns:`ueransim-001010000000001-internet` and runs there.
 ```
 # ./nr-ue -c ../config/open5gs-ue1.yaml 
 UERANSIM v3.2.8
