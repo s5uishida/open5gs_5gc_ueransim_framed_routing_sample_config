@@ -922,8 +922,7 @@ Looking at the console log of the `nr-ue` command, UE0 has been assigned the IP 
 ```
 Just in case, after logging in VM3 from another terminal, move to netns:`ueransim-001010000000000-internet` and make sure it matches the IP address of the UE0's TUNnel interface.
 ```
-# ip netns exec ueransim-001010000000000-internet bash
-# ip addr show
+# ip netns exec ueransim-001010000000000-internet ip addr show
 ...
 5: uesimtun0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1400 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none 
@@ -1063,8 +1062,7 @@ Looking at the console log of the `nr-ue` command, UE1 has been assigned the IP 
 ```
 Just in case, after logging in VM3 from another terminal, move to netns:`ueransim-001010000000001-internet` and make sure it matches the IP address of the UE1's TUNnel interface.
 ```
-# ip netns exec ueransim-001010000000001-internet bash
-# ip addr show
+# ip netns exec ueransim-001010000000001-internet ip addr show
 ...
 6: uesimtun0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1400 qdisc fq_codel state UNKNOWN group default qlen 500
     link/none 
@@ -1082,8 +1080,7 @@ Just in case, after logging in VM3 from another terminal, move to netns:`ueransi
 
 On PC1, run `tcpdump` on `veth-pc1` to check Frame Routing of UE0 (`192.168.20.0/24`).
 ```
-# ip netns exec pc1 bash
-# tcpdump -l -i veth-pc1 -n
+# ip netns exec pc1 tcpdump -l -i veth-pc1 -n
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on veth-pc1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
@@ -1094,8 +1091,7 @@ listening on veth-pc1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 
 On PC2, run `tcpdump` on `veth-pc2` to check Frame Routing of UE1 (`192.168.21.0/24`).
 ```
-# ip netns exec pc2 bash
-# tcpdump -l -i veth-pc2 -n
+# ip netns exec pc2 tcpdump -l -i veth-pc2 -n
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on veth-pc2, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
@@ -1106,8 +1102,7 @@ listening on veth-pc2, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 
 On PC3, run `tcpdump` on `veth-pc3` to check Frame Routing of UE1 (`192.168.22.0/24`).
 ```
-# ip netns exec pc3 bash
-# tcpdump -l -i veth-pc3 -n
+# ip netns exec pc3 tcpdump -l -i veth-pc3 -n
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on veth-pc3, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
