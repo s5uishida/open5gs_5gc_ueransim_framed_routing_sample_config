@@ -33,7 +33,7 @@ The related documents can be found below.
   - [Network settings of External Node](#network_settings_ext)
   - [Network settings of VM3](#network_settings_vm3)
     - [Add netns](#add_netns)
-    - [Setup veth pair for UE0 and PC1](#setup_ue0)
+    - [Setup veth pair for UE0 and PC1/PC4](#setup_ue0)
     - [Setup veth pair for UE1 and PC2/PC3](#setup_ue1)
 - [Add Framed Routes to Subscriber information](#add_framed_routes)
   - [Add Framed Routes to UE0](#add_framed_routes_ue0)
@@ -49,11 +49,12 @@ The related documents can be found below.
   - [Run tcpdump on PC1](#run_pc1)
   - [Run tcpdump on PC2](#run_pc2)
   - [Run tcpdump on PC3](#run_pc3)
+  - [Run tcpdump on PC4](#run_pc4)
 - [Ping Framed Routes](#ping)
-  - [Ping IP address (192.168.20.100/24) of Framed Routes of UE0 on PC1](#ping_ue0)
-  - [Ping IP address (192.168.21.100/24) of Framed Routes of UE1 on PC2](#ping_ue11)
-  - [Ping IP address (192.168.22.100/24) of Framed Routes of UE1 on PC3](#ping_ue12)
-  - [Ping IP address (192.168.23.100/24) of Framed Routes (not exist)](#ping_ue2)
+  - [Ping IP address (192.168.20.100/24) of Framed Routes of UE0 on PC1](#ping_pc1)
+  - [Ping IP address (192.168.21.100/24) of Framed Routes of UE1 on PC2](#ping_pc2)
+  - [Ping IP address (192.168.22.100/24) of Framed Routes of UE1 on PC3](#ping_pc3)
+  - [Ping IP address (192.168.23.100/24) not configured for Framed Routes](#ping_pc4)
 - [Changelog (summary)](#changelog)
 ---
 <a id="overview"></a>
@@ -65,6 +66,7 @@ I created a 5GC simulation mobile network for  the purpose of using  the IP rout
 The following minimum configuration was set as a condition.
 - Two UEs have the same DNN and connect to the same DN.
 - Two UEs have different Framed Routes. On the UPF VM, make sure to be able to ping the Framed Routes via the IP address (Tunnel GW/uesimtun0) assigned to each UE.
+- Confirm not to be able to ping to a network that is not configured in the Framed Routes.
 
 The built simulation environment is as follows.
 
@@ -90,11 +92,13 @@ Each VMs are as follows.
 || PC1 Internal Node | **192.168.20.100/24** | -- | -- | -- | -- |
 || PC2 Internal Node | **192.168.21.100/24** | -- | -- | -- | -- |
 || PC3 Internal Node | **192.168.22.100/24** | -- | -- | -- | -- |
+|| PC4 Internal Node | **192.168.23.100/24** | -- | -- | -- | -- |
 
 Pairs of network namespaces and virtual network interfaces are follows.
 | Role | netns | veth | veth | netns | Role |
 | --- | --- | --- | --- | --- | --- |
 | UE0 | ueransim-001010000000000-internet | veth-ue0-pc1<br>**192.168.20.1/24** | veth-pc1<br>**192.168.20.100/24** | pc1 | PC1 |
+||| veth-ue0-pc4<br>**192.168.23.1/24** | veth-pc4<br>**192.168.23.100/24** | pc4 | PC4 |
 | UE1 | ueransim-001010000000001-internet | veth-ue1-pc2<br>**192.168.21.1/24** | veth-pc2<br>**192.168.21.100/24** | pc2 | PC2 |
 ||| veth-ue1-pc3<br>**192.168.22.1/24** | veth-pc3<br>**192.168.22.100/24** | pc3 | PC3 |
 
@@ -104,6 +108,8 @@ Subscriber Information (other information is the same) is as follows.
 | --- | --- | --- | --- | --- | --- |
 | UE0 | 001010000000000 | internet | OPc | **192.168.20.0/24** | **192.168.20.1** |
 | UE1 | 001010000000001 | internet | OPc | **192.168.21.0/24<br>192.168.22.0/24** | **192.168.21.1<br>192.168.22.1** |
+
+**Note. <ins>192.168.23.0/24</ins> is not configured for Framed Routes.**
 
 I registered these information with the Open5GS WebUI.
 In addition, [3GPP TS 35.208](https://www.3gpp.org/DynaReport/35208.htm) "4.3 Test Sets" is published by 3GPP as test data for the 3GPP authentication and key generation functions (MILENAGE).
@@ -409,6 +415,7 @@ ip link set ogstun up
 ip route add 192.168.20.0/24 dev ogstun
 ip route add 192.168.21.0/24 dev ogstun
 ip route add 192.168.22.0/24 dev ogstun
+ip route add 192.168.23.0/24 dev ogstun
 ```
 
 <a id="network_settings_ext"></a>
@@ -421,6 +428,7 @@ ip route add 10.45.0.0/16 via 192.168.16.151
 ip route add 192.168.20.0/24 via 192.168.16.151
 ip route add 192.168.21.0/24 via 192.168.16.151
 ip route add 192.168.22.0/24 via 192.168.16.151
+ip route add 192.168.23.0/24 via 192.168.16.151
 ```
 
 <a id="network_settings_vm3"></a>
@@ -441,13 +449,14 @@ First, create 3 netns for the terminals.
 ip netns add pc1
 ip netns add pc2
 ip netns add pc3
+ip netns add pc4
 ```
 From here on, I will explain how to setup netns and veth, but please note that these settings will be applied to the netns created by running UE0 and UE1.
 In other words, run UE0 and UE1 before performing these operations.
 
 <a id="setup_ue0"></a>
 
-#### Setup veth pair for UE0 and PC1
+#### Setup veth pair for UE0 and PC1/PC4
 
 This explanation assumes that running UE0 will create `ueransim-001010000000000-internet` as netns.
 
@@ -466,6 +475,13 @@ ip link set veth-pc1 netns pc1
 ip addr add 192.168.20.1/24 dev veth-ue0-pc1
 ip link set veth-ue0-pc1 up
 ```
+Similarly, create `veth-ue0-pc4` and `veth-pc4`, then move `veth-pc4` to netns:`pc4`. Assign `192.168.23.1/24` to `veth-ue0-pc4` and enable `veth-ue0-pc4`.
+```
+ip link add veth-ue0-pc4 type veth peer name veth-pc4
+ip link set veth-pc4 netns pc4
+ip addr add 192.168.23.1/24 dev veth-ue0-pc4
+ip link set veth-ue0-pc4 up
+```
 Next, move to netns:`pc1`.
 ```
 ip netns exec pc1 bash
@@ -475,6 +491,17 @@ Assign `192.168.20.100/24` ​​to `veth-pc1` and enable `veth-pc1`. Then, set 
 ip addr add 192.168.20.100/24 dev veth-pc1
 ip link set veth-pc1 up
 ip route add default via 192.168.20.1 dev veth-pc1
+ip link set lo up
+```
+Similarly, move to netns:`pc4`.
+```
+ip netns exec pc4 bash
+```
+Assign `192.168.23.100/24` ​​to `veth-pc4` and enable `veth-pc4`. Then, set `192.168.23.1` as the default route. Finally, enable interface `lo`.
+```
+ip addr add 192.168.23.100/24 dev veth-pc4
+ip link set veth-pc4 up
+ip route add default via 192.168.23.1 dev veth-pc4
 ip link set lo up
 ```
 
@@ -932,7 +959,7 @@ Just in case, after logging in VM3 from another terminal, move to netns:`ueransi
        valid_lft forever preferred_lft forever
 ...
 ```
-**Don't forget [Setup veth pair for UE0 and PC1](#setup_ue0).**
+**Don't forget [Setup veth pair for UE0 and PC1/PC4](#setup_ue0).**
 
 <a id="start_ue1"></a>
 
@@ -1107,11 +1134,22 @@ tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on veth-pc3, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 ```
 
+<a id="run_pc4"></a>
+
+### Run tcpdump on PC4
+
+On PC4, run `tcpdump` on `veth-pc4` and confirm that no frame routing is configured for UE0 (`192.168.23.0/24`).
+```
+# ip netns exec pc4 tcpdump -l -i veth-pc4 -n
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on veth-pc4, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+```
+
 <a id="ping"></a>
 
 ## Ping Framed Routes
 
-<a id="ping_ue0"></a>
+<a id="ping_pc1"></a>
 
 ### Ping IP address (192.168.20.100/24) of Framed Routes of UE0 on PC1
 
@@ -1134,7 +1172,7 @@ The `tcpdump` log on PC1 is as follows.
 ```
 **Note. Confirm that no packets have arrived at PC2 and PC3.**
 
-<a id="ping_ue11"></a>
+<a id="ping_pc2"></a>
 
 ### Ping IP address (192.168.21.100/24) of Framed Routes of UE1 on PC2
 
@@ -1157,7 +1195,7 @@ The `tcpdump` log on PC2 is as follows.
 ```
 **Note. Confirm that no packets have arrived at PC1 and PC3.**
 
-<a id="ping_ue12"></a>
+<a id="ping_pc3"></a>
 
 ### Ping IP address (192.168.22.100/24) of Framed Routes of UE1 on PC3
 
@@ -1180,16 +1218,16 @@ The `tcpdump` log on PC3 is as follows.
 ```
 **Note. Confirm that no packets have arrived at PC1 and PC2.**
 
-<a id="ping_ue2"></a>
+<a id="ping_pc4"></a>
 
-### Ping IP address (192.168.23.100/24) of Framed Routes (not exist)
+### Ping IP address (192.168.23.100/24) not configured for Framed Routes
 
-On EXT (External Node), ping IP address (`192.168.23.100/24`) of Framed Routes which do not exist on either UE0 or UE1, and confirm no packets with `tcpdump` running on PC1, PC2 and PC3.
+On EXT (External Node), ping IP address (`192.168.23.100/24`) that is not configured in Framed Routes, and confirm no packets with `tcpdump` running on PC4.
 ```
 # ping 192.168.23.100
 PING 192.168.23.100 (192.168.23.100) 56(84) bytes of data.
 ```
-**Make sure there are no tcpdump logs on PC1, PC2 and PC3.**
+**Also make sure there are no tcpdump logs on PC1, PC2 and PC3.**
 
 ---
 I was able to confirm the very simple configuration for Framed Routing.
